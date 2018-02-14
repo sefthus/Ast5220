@@ -26,7 +26,7 @@ plt.plot( x_eta, omega_m+omega_b+omega_r+ omega_lambda, label= '$\Omega_\mathrm{
 plt.xlabel(r'$x$')
 plt.ylabel(r'$\Omega_\mathrm{X}$')
 plt.legend(loc='center left')
-plt.grid('on')
+plt.grid('on', linestyle ='--')
 #plt.show()
 
 plt.figure()
@@ -34,7 +34,7 @@ plt.plot(x_eta,H)
 plt.xlabel(r'$x$')
 plt.ylabel(r'$H(x)$ [km s$^{-1}$Mpc$^{-1}$]')
 plt.yscale('log')
-plt.grid('on')
+plt.grid('on', linestyle ='--')
 
 #plt.show()
 
@@ -45,17 +45,17 @@ plt.xlabel(r'$z$')
 plt.ylabel(r'$H(z)$ [km s$^{-1}$Mpc$^{-1}$]')
 plt.yscale('log')
 plt.xscale('log')
-plt.grid('on')
+plt.grid('on', linestyle ='--')
 plt.show()
 
 plt.figure()
 plt.plot(x_eta,eta, label=r'$\eta_{computed}$')
-plt.plot(x_t,eta_t,'r--', label=r'$\eta_{splined}$')
+plt.plot(x_t,eta_t,'--', label=r'$\eta_{splined}$')
 plt.legend(loc='lower right')
 plt.yscale('log')
 plt.xlabel(r'$x$')
 plt.ylabel(r'$\eta(x)$ [Mpc]')
-plt.grid('on')
+plt.grid('on', linestyle ='--')
 plt.show()
 
 
