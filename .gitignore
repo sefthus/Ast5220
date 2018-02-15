@@ -66,7 +66,16 @@ Thumbs.db
 
 # Python byte code
 *.pyc
+*.py~
 
+# Tex genereated files
+*.aux
+*.upa
+*.upb
+*.synctex.gz
+*.out
+*.tex
+*.log
 # Binaries
 # --------
 *.dll
