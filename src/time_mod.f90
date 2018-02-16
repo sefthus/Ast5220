@@ -46,7 +46,7 @@ contains
     allocate(x_t(n_t))
     allocate(a_t(n_t))
 
-	  ! x_init = x_start_rec
+    ! x_init = x_start_rec
     x_int1 = (x_end_rec - x_start_rec) /(n1 - 1)
     x_int2 = (x_0 - x_end_rec) /(n2 - 1)
 
@@ -61,7 +61,7 @@ contains
        x_t(n1+i) = x_end_rec + i*x_int2
     end do
 
-   	! a grid values
+    ! a grid values
     a_t = exp(x_t) ! x = ln a
 
 
@@ -73,7 +73,7 @@ contains
     
     ! x_eta grid
     x_eta_int = (x_eta2 - x_eta1)/(n_eta - 1)
-  	x_eta(1) = x_eta1
+    x_eta(1) = x_eta1
     do i=1,n_eta-1
        x_eta(i+1) = x_eta1 + i*x_eta_int
     end do
