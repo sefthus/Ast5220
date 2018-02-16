@@ -36,7 +36,7 @@ print 'dark energy - matter equality at: x = %.3f , a = %.4f , z = %.3f, Omega =
 #------------------------------------- plotting
 plt.rc('text',usetex=True)
 plt.rc('font',**{'family':'serif','size':14})
-
+'''
 #------------------------------------- plotting omega
 plt.figure()
 plt.plot( x_eta, omega_m, label = r'$\Omega_\mathrm{m}$')
@@ -72,7 +72,7 @@ plt.yscale('log')
 plt.xscale('log')
 plt.grid('on', linestyle ='--')
 plt.show()
-
+'''
 #------------------------------------- plotting eta against x
 plt.figure()
 plt.plot(x_eta,eta)
@@ -80,6 +80,7 @@ plt.yscale('log')
 plt.xlabel(r'$x$')
 plt.ylabel(r'$\eta(x)$ [Mpc]')
 plt.grid('on', linestyle ='--')
+plt.tight_layout()
 plt.show()
 
 
