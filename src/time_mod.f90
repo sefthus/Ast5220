@@ -40,7 +40,7 @@ contains
     x_eta2      = 0.d0                      ! End value of x for eta evaluation
 
     eps         = 1.d-8                        ! spline error limit 
-	eta_init    = H_0*sqrt(omega_r + omega_nu) ! eta initial value at a=0
+	eta_init    = c*a_init/H0 ! eta initial value at a=0
 
     ! Task: Fill in x and a grids
     allocate(x_t(n_t))
