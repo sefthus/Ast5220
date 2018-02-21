@@ -22,6 +22,7 @@ contains
     real(dp)     :: z_start_rec, z_end_rec, z_0, x_start_rec, x_end_rec, x_0, dx, x_eta1, x_eta2, a_init
     real(dp)     :: x_init, x_int1, x_int2, x_eta_int, eps, step, stepmin, eta_init, rho_c
     real(dP)     :: H_scale, Omega_mx, Omega_bx, Omega_rx, Omega_lambdax, z
+    real(dp), dimension(1) :: y 
 
     ! Define two epochs, 1) during and 2) after recombination.
     n1          = 200                       ! Number of grid points during recombination
@@ -40,7 +41,7 @@ contains
     x_eta2      = 0.d0                      ! End value of x for eta evaluation
 
     eps         = 1.d-8                        ! spline error limit 
-    eta_init    = c*a_init/H0/sqrt(Omega_r) ! eta initial value at a=0
+    eta_init    = c/get_H_p(x_eta1)!*a_init/(H0*sqrt(Omega_r)) ! eta initial value at a=0
 
     ! Task: Fill in x and a grids
     allocate(x_t(n_t))
@@ -83,10 +84,11 @@ contains
     step = abs((x_eta(1) - x_eta(2))/ 100.d0)
     stepmin = abs((x_eta(1) - x_eta(2))/ 10000.d0)
     
+    y(1) = eta_init
     eta(1) = eta_init
-    do i=1,n_eta-1   
-       eta(i+1) = eta(i)    
-       call odeint(eta(i+1:i+1), x_eta(i), x_eta(i+1), eps, step, stepmin, derivs, bsstep, output)
+    do i=1,n_eta-1       
+       call odeint(y, x_eta(i), x_eta(i+1), eps, step, stepmin, derivs, bsstep, output)
+       eta(i+1) = y(1)
     end do
 
     ! calling spline on eta
