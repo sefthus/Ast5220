@@ -57,7 +57,7 @@ plt.ylabel(r'$\Omega_\mathrm{X}$')
 plt.legend(loc='center left')
 plt.grid('on', linestyle ='--')
 #plt.show()
-
+'''
 #------------------------------------- plotting H against x
 plt.figure()
 plt.plot(x_eta,H)
@@ -89,3 +89,4 @@ plt.tight_layout()
 plt.show()
 
 
+'''
