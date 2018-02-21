@@ -100,7 +100,7 @@ contains
     open (unit=3, file = 'xeta_eta.dat', status='replace')
     open (unit=4, file = 'xeta_z_H.dat', status='replace')
 
-    do i=1,n_t ! close files
+    do i=1,n_t 
        write (1,'(2(E17.8))') x_t(i), get_eta(x_t(i))
     end do
     
@@ -121,7 +121,7 @@ contains
 
     end do
 
-    do i=1,4
+    do i=1,4 ! close files
       close(i)
     end do
 

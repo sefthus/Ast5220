@@ -30,9 +30,14 @@ a_matlam_eq = np.exp(x_matlam_eq)
 z_matlam_eq = 1./a_matlam_eq -1
 omega_matlam_eq = omega_m[indx2]
 
-print 'radiation - matter equality at:   x = %.3f , a = %.4f , z = %.3f, Omega = %.3f' % (x_radmat_eq, a_radmat_eq, z_radmat_eq, omega_radmat_eq)
-print 'dark energy - matter equality at: x = %.3f , a = %.4f , z = %.3f, Omega = %.3f' % (x_matlam_eq, a_matlam_eq, a_matlam_eq, omega_matlam_eq)
+print 'radiation - matter equality at:   x = %.3f , a = %.4f , z = %.3f, Omega_r = %.3f' % (x_radmat_eq, a_radmat_eq, z_radmat_eq, omega_radmat_eq)
+print 'dark energy - matter equality at: x = %.3f , a = %.4f , z = %.3f, Omega_m = %.3f' % (x_matlam_eq, a_matlam_eq, a_matlam_eq, omega_matlam_eq)
+print 'maximum dark matter density max(Omega_m) =', np.max(omega_m)
+print 'final density parameter values: Omega_b = %.4f,  Omega_m = %.4f,  Omega_r = %.4f,  Omega_lambda = %.4f' \
+			% (omega_b[-1], omega_m[-1], omega_r[-1], omega_lambda[-1])
+print 'conformal time today eta(x=0) = ', eta[-1]/1e3, 'Gpc'
 
+print 'Hubble parameter today H=', H[-1], 'km s^-1 Mpc^-1'
 #------------------------------------- plotting
 plt.rc('text',usetex=True)
 plt.rc('font',**{'family':'serif','size':14})
