@@ -49,7 +49,7 @@ contains
 
     ! x_init = x_start_rec
     x_int1 = (x_end_rec - x_start_rec) /(n1 - 1)
-    x_int2 = (x_0 - x_end_rec) /(n2 - 1)
+    x_int2 = (x_0 - x_end_rec) /n2
 
     ! x grid during recombination
     x_t(1) = x_start_rec
@@ -116,7 +116,6 @@ contains
       Omega_lambdax = Omega_lambda * H_scale**2
 
       z = exp(-x_eta(i))-1
-      !write (*,'(3(E17.8))') x_eta(i), z, get_H(x_eta(i)),z
       write (2,'(4(E17.8))') Omega_mx, Omega_bx, Omega_rx, Omega_lambdax
       write (3,'(2(E17.8))') x_eta(i), eta(i)
       write (4,'(3(E17.8))') x_eta(i), z, get_H(x_eta(i))
@@ -167,7 +166,7 @@ contains
     real(dp)             :: get_H_p
     real(dp)             :: a
     a = exp(x)
-    get_H_p = a*H_0*sqrt((Omega_b+Omega_m)*a**(-3) + (Omega_r + Omega_nu)*a**(-4) + Omega_lambda)
+    get_H_p = a*get_H(x)
 
   end function get_H_p
 
@@ -179,7 +178,7 @@ contains
     real(dp)             :: get_dH_p
     real(dp)             :: a
     a = exp(x)    
-    get_dH_p = -H_0*(0.5d0*(Omega_b-Omega_m)*a**(-2) + (Omega_r + Omega_nu)*a**(-3) - Omega_lambda*a)/sqrt((Omega_b+Omega_m)*a**(-3) + (Omega_r + Omega_nu)*a**(-4) + Omega_lambda)
+    get_dH_p = -H_0**2*(0.5d0*(Omega_b-Omega_m)*a**(-2) + (Omega_r + Omega_nu)*a**(-3) - Omega_lambda*a)/get_H(x)
   end function get_dH_p
 
   ! Task: Write a function that computes eta(x), using the previously precomputed splined function
