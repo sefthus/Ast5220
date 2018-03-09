@@ -42,7 +42,7 @@ print 'Hubble parameter today H=', H[-1], 'km s^-1 Mpc^-1'
 #------------------------------------- plotting
 plt.rc('text',usetex=True)
 plt.rc('font',**{'family':'serif','size':14})
-'''
+
 #------------------------------------- plotting omega
 plt.figure()
 plt.plot( x_eta, omega_m, label = r'$\Omega_\mathrm{m}$')
@@ -58,7 +58,7 @@ plt.ylabel(r'$\Omega_\mathrm{X}$')
 plt.legend(loc='center left')
 plt.grid('on', linestyle ='--')
 #plt.show()
-'''
+
 #------------------------------------- plotting H against x
 plt.figure()
 plt.plot(x_eta,H)
@@ -78,7 +78,7 @@ plt.yscale('log')
 plt.xscale('log')
 plt.grid('on', linestyle ='--')
 plt.show()
-'''
+
 #------------------------------------- plotting eta against x
 plt.figure()
 plt.plot(x_eta,eta)
@@ -90,4 +90,4 @@ plt.tight_layout()
 plt.show()
 
 
-'''
+

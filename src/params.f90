@@ -32,7 +32,7 @@ module params
   real(dp), parameter :: sigma_T      = 6.652462d-29
   real(dp), parameter :: G_grav       = 6.67258d-11
   real(dp), parameter :: rho_c        = 3.d0*H_0**2 / (8.d0*pi*G_grav)
-  real(dp), parameter :: alpha        = 7.29735308d-3
+  real(dp), parameter :: alpha        = 7.29735308d-3 ! fine structure constant
   real(dp), parameter :: hbar         = 1.05457148d-34
   real(dp), parameter :: k_b          = 1.3806503d-23
 
