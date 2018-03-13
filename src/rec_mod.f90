@@ -23,15 +23,15 @@ contains
     real(dp)     :: saha_limit, y, T_b, n_b, dydx, xmin, xmax, dx, f, n_e0, X_e0, xstart, xstop
     logical(lgt) :: use_saha
     real(dp), allocatable, dimension(:) :: X_e ! Fractional electron density, n_e / n_H
-    real(dp)     :: dx_rec, step, stepmin
-    real(dp), dimension(1) :: y
+    real(dp)     :: step, stepmin, eps, z
+    !real(dp), dimension(1) :: y
 
     saha_limit = 0.99d0       ! Switch from Saha to Peebles when X_e < 0.99
     xstart     = log(1.d-10)  ! Start grids at a = 10^-10
     xstop      = 0.d0         ! Stop  grids at a = 1
     n          = 1000         ! Number of grid points between xstart and xstopo
 
-    eps        = 1.d-8        ! spline error limit    
+    eps        = 1.d-10        ! spline error limit    
 
     allocate(x_rec(n))
     allocate(X_e(n))
@@ -45,59 +45,132 @@ contains
     allocate(g22(n))
 
     ! Task: Fill in x (rec) grid
+    write(*,*) "making x grid"
     x_rec(1) = xstart
-    dx_rec   = (xstop-xstart)/(n-1)
+    dx   = (xstop-xstart)/(n-1)
 
-    do i = 1, n
-       x_rec(i+1) = xstart + i*dx_rec
-
-    a_rec = exp(x_rec)
+    do i = 1, n-1
+       x_rec(i+1) = xstart + i*dx
+    end do
 
 
     ! Task: Compute X_e and n_e at all grid times
-    step       = abs((x_rec(1) - x_rec(2))/ 100.d0)     !integration step length
-    stepmin    = abs((x_rec(1) - x_rec(2))/ 10000.d0)
+    step       = abs((x_rec(1) - x_rec(2))*1.d-3)     ! n-1 maybe integration step length
+    stepmin    = 0.d0
 
+    write(*,*) "calculating X_e"
     use_saha = .true.
-    do i = 1, n-1
-       T_b = T_0/a_rec(i)
-       n_b = Omega_b*rho_c/(m_H*a_rec(i)**3)
+    do i = 1, n
+       !write(*,*) "loop 2"
+       n_b = Omega_b*rho_c/(m_H*exp(x_rec(i))**3)
        if (use_saha) then
           ! Use the Saha equation
-          K = 1.d0/(n_b * hbar**3) * ((m_e*k_b*T_b)/(2*pi))**(3.d0/2.d0) * exp(-epsilon_0/(k_b * T_b)s)
-          X_e(i)= (-K + sqrt(K**2 + 4.d0*K))/2.d0
+          T_b = T_0/exp(x_rec(i))
+          X_e0 = ((m_e*k_b*T_b)/(2.d0*pi*hbar**2))**(1.5d0) * exp(-epsilon_0/(k_b * T_b))/n_b
+          X_e(i)= (-X_e0 + sqrt(X_e0**2 + 4.d0*X_e0))/2.d0
 
-          if (X_e(i) < saha_limit) use_saha = .false.
+         if (X_e(i) < saha_limit) use_saha = .false.
        else
           ! Use the Peebles equation
-          !y(1)=X_e(i)
-          X_e(i+1) = X_e(i)
-          call odeint(X_e(i+1:i+1), x_rec(i), x_rec(i+1), eps, step, stepmin, derivs, bsstep, output)
+          
+          X_e(i) = X_e(i-1)
+          call odeint(X_e(i:i), x_rec(i-1), x_rec(i), eps, step, stepmin, dX_edx, bsstep, output)
 
 
        end if
+       n_e(i) =X_e(i)*n_b
+       write(*,*) "loop ",i
     end do
-    
-    n_e = X_e*n_b       ! electron density
 
+    
     ! Task: Compute splined (log of) electron density function
     n_e = log(n_e)
+    write(*,*) "splining ne"
     call spline(x_rec, n_e, 1d30, 1d30, n_e2)
 
     ! Task: Compute optical depth at all grid points
+    write(*,*) "calculating tau"
+    tau(n) = 0.d0 ! initial condition, present day value
+    do i = n-1,1,-1
+      tau(i)=tau(i+1)
+      call odeint(tau(i:i), x_rec(i+1), x_rec(i), eps, step, stepmin, dtau_dx, bsstep, output)
+    end do
 
-
+    
     ! Task: Compute splined (log of) optical depth
-    ! Task: Compute splined second derivative of (log of) optical depth
+    write(*,*) "splining tau and ddtau"
+    call spline(x_rec, tau, 1d30,1d30, tau2)
 
+    ! Task: Compute splined second derivative of (log of) optical depth
+    call spline(x_rec, tau2,1d30,1d30,tau22)
+
+!------------- visibility function g ---
+
+    write(*,*) "calculating g"
+    do i=1, n
+      g(i) = -get_dtau(x_rec(i)) * exp(-tau(i))
+    end do
 
     ! Task: Compute splined visibility function
+    write(*,*) "splining g and ddg"
+    call spline(x_rec, g, 1d30, 1d30, g2)
     ! Task: Compute splined second derivative of visibility function
+    call spline(x_rec, g2, 1d30, 1d30, g22)
 
+
+!---------- write to file ---
+    write(*,*) "opening files "
+    open (unit=1, file = 'x_tau.dat', status='replace')
+    open (unit=2, file = 'x_g.dat', status='replace')
+    open (unit=3, file = 'z_Xe.dat', status='replace')
+    
+    write(*,*) "writing stuff"
+    do i=1, n
+      z = exp(-x_rec(i))-1
+      write (1,'(4(E17.8))') x_rec(i), tau(i), get_dtau(x_rec(i)), get_ddtau(x_rec(i))
+      write (2,'(4(E17.8))') x_rec(i), g(i), get_dg(x_rec(i)), get_ddg(x_rec(i))
+      write (3,'(2(E17.8))') z, X_e(i)
+
+    end do
+    
+    write(*,*) " closing files "
+    do i=1,3 ! close files
+      close(i)
+    end do
 
   end subroutine initialize_rec_mod
 
+
 !---------------------- Peebles equation ----
+  subroutine dX_edx(x, X_e, dydx)
+        use healpix_types
+        implicit none
+        real(dp),               intent(in)  :: x
+        real(dp), dimension(:), intent(in)  :: X_e
+        real(dp), dimension(:), intent(out) :: dydx
+        real(dp) :: T_b,n_b,phi2,alpha2,beta,beta2,n1s,lambda_alpha,C_r,H,lambda_2s1s
+        H      = get_H(x)
+        T_b    = T_0/exp(x)
+        n_b    = Omega_b*rho_c/(m_H*exp(x)**3)
+        phi2   = 0.448d0*log(epsilon_0/(k_b*T_b))
+        alpha2 = 64.d0*pi/sqrt(27.d0*pi)*(alpha/m_e)**2*sqrt(epsilon_0/(k_b*T_b))*phi2*hbar**2/c
+        beta   = alpha2 *((m_e*k_b*T_b)/(2.d0*pi*hbar**2))**1.5*exp(-epsilon_0/(k_b*T_b))
+
+        ! To avoid beta2 going to infinity, set it to 0
+        if(T_b <= 169.d0) then
+            beta2    = 0.d0
+        else
+            beta2    = beta*exp((3.d0*epsilon_0)/(4.d0*k_b*T_b))
+        end if
+        lambda_2s1s = 8.227d0
+        n1s          = (1.d0-X_e(1))*n_b
+        lambda_alpha = H*(3.d0*epsilon_0)**3/((8.d0*pi)**2*n1s) /(c*hbar)**3
+        C_r          = (lambda_2s1s +lambda_alpha)/(lambda_2s1s+lambda_alpha+beta2)
+        dydx         = C_r/H*(beta*(1.d0-X_e(1)) - n_b*alpha2*X_e(1)**2)
+
+    end subroutine dX_edx
+
+
   subroutine dXe_dx(x, X_e, dydx)
     ! we define dy/dx
     use healpix_types
@@ -105,27 +178,52 @@ contains
     real(dp),               intent(in)  :: x
     real(dp), dimension(:), intent(in)  :: X_e
     real(dp), dimension(:), intent(out) :: dydx
-    real(dp) :: beta, beta2, alpha2, n_b, n_1s, lambda_21s, lambda_alpha
-    real(dp) :: C_r, T_b, H, phi2 
+    real(dp) :: beta, beta2, alpha2, n_b, n1s, lambda_21s, lambda_alpha
+    real(dp) :: C_r, T_b, H, phi2  
+    
     
     H    = get_H(x)
+    !write(*,*) "H"
     T_b  = T_0/exp(x)
     n_b  = Omega_b*rho_c/(m_H*exp(x)**3)
-    n1s  = (1 - X_e)* n_b
 
-    phi2 = 0.448*log(epsilon_0/(k_b * T_b))
-    alpha2 = 64*pi/sqrt(27*pi) * alpha**2/m_e**2 * sqrt(epsilon_0/T_b)*phi2
+    phi2 = 0.448d0*log(epsilon_0/(k_b * T_b))
+    alpha2 = 64.d0*pi/sqrt(27.d0*pi) *(alpha/m_e)**2 *sqrt(epsilon_0/(k_b * T_b)) *phi2 *hbar**2/c
+    beta = alpha2*((m_e*k_b*T_b)/(2.d0*pi*hbar**2))**(1.5d0) * exp(-epsilon_0/(k_b * T_b))
 
-    beta = alpha2*(me*kb*Tb)**(1.5d0) * exp(-epsilon_0/(k_b * T_b))
-    beta2 = beta * exp(3*epsilon_0/(4 * k_b*T_b))
+    !beta2 = beta * exp(3.d0*epsilon_0/(4.d0 * k_b*T_b))
+    ! To avoid beta2 going to infinity, set it to 0
 
-    lambda_alpha = H * (3*epsilon_0)**3/((8*pi)**2 * n1s)
-    lambda_21s = 8.227
-
-    C_r = (lambda_21s + lambda_alpha)/(lambda_21s + lambda_alpha + beta2)
+    if(T_b <= 169.d0) then
+       beta2 = 0.d0
+    else
+       beta2 = beta * exp(3.d0*epsilon_0/(4.d0 * k_b*T_b))
+    end if
+    n1s  = (1.d0 - X_e(1))* n_b ! X_e(1)
+ 
+    lambda_alpha = H * (3.d0*epsilon_0)**3/((8.d0*pi)**2 * n1s)/(c*hbar)**3
+    lambda_21s = 8.227d0
     
-    dydx = C_r/H * (beta * (1-X_e) - n_H * alpha2 * X_e**2)
+    C_r = (lambda_21s + lambda_alpha)/(lambda_21s + lambda_alpha + beta2)
+    !write(*,*) "dydx"
+    dydx = C_r/H * (beta * (1.d0-X_e(1)) - n_b * alpha2 * X_e(1)**2)
+
   end subroutine dXe_dx
+
+
+  subroutine dtau_dx(x, tau, dydx)
+    ! we define dy/dx
+    use healpix_types
+    implicit none
+    real(dp),               intent(in)  :: x
+    real(dp), dimension(:), intent(in)  :: tau
+    real(dp), dimension(:), intent(out) :: dydx
+    
+    dydx = get_n_e(x) * sigma_T * exp(x)/get_H_p(x)
+
+  end subroutine dtau_dx
+
+
 
   ! Task: Complete routine for computing n_e at arbitrary x, using precomputed information
   ! Hint: Remember to exponentiate...
@@ -134,6 +232,8 @@ contains
 
     real(dp), intent(in) :: x
     real(dp)             :: get_n_e
+    ! n_e is actually log(n_e)
+    get_n_e = exp(splint(x_rec, n_e, n_e2, x))
 
   end function get_n_e
 
@@ -143,6 +243,8 @@ contains
 
     real(dp), intent(in) :: x
     real(dp)             :: get_tau
+    
+    get_tau = splint(x_rec, tau, tau2, x)
 
   end function get_tau
 
@@ -152,6 +254,8 @@ contains
 
     real(dp), intent(in) :: x
     real(dp)             :: get_dtau
+    
+    get_dtau = splint_deriv(x_rec,tau,tau2,x)
 
   end function get_dtau
 
@@ -163,6 +267,8 @@ contains
     real(dp), intent(in) :: x
     real(dp)             :: get_ddtau
 
+    get_ddtau = splint(x_rec, tau2, tau22, x)
+
   end function get_ddtau
 
   ! Task: Complete routine for computing the visibility function, g, at arbitray x
@@ -172,6 +278,8 @@ contains
     real(dp), intent(in) :: x
     real(dp)             :: get_g
 
+    get_g = splint(x_rec, g, g2, x)
+
   end function get_g
 
   ! Task: Complete routine for computing the derivative of the visibility function, g, at arbitray x
@@ -180,6 +288,8 @@ contains
 
     real(dp), intent(in) :: x
     real(dp)             :: get_dg
+    
+    get_dg = splint_deriv(x_rec, g,g2,x)
 
   end function get_dg
 
@@ -189,6 +299,9 @@ contains
 
     real(dp), intent(in) :: x
     real(dp)             :: get_ddg
+
+
+    get_ddg = splint(x_rec, g2, g22, x)
 
   end function get_ddg
 
