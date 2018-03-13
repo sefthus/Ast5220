@@ -124,7 +124,7 @@ contains
     write(*,*) "opening files "
     open (unit=1, file = 'x_tau.dat', status='replace')
     open (unit=2, file = 'x_g.dat', status='replace')
-    open (unit=3, file = 'z_Xe.dat', status='replace')
+    open (unit=3, file = 'x_z_Xe.dat', status='replace')
     
     write(*,*) "writing stuff"
     do i=1, n
