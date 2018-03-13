@@ -93,7 +93,7 @@ contains
 
     tau(n) = 0.d0 ! initial condition, present day value
     do i = n-1, 1,-1
-      tau(i)=tau(i+1)
+      tau(i) = tau(i+1)
       call odeint(tau(i:i), x_rec(i+1), x_rec(i), eps, step, stepmin, dtau_dx, bsstep, output)
     end do
 
@@ -115,6 +115,7 @@ contains
     ! Task: Compute splined visibility function
     write(*,*) "splining g and ddg"
     call spline(x_rec, g, 1.d30, 1.d30, g2)
+
     ! Task: Compute splined second derivative of visibility function
     call spline(x_rec, g2, 1.d30, 1.d30, g22)
 
@@ -128,10 +129,10 @@ contains
     write(*,*) "writing stuff"
     do i=1, n
       z = exp(-x_rec(i))-1
-      write (1,'(4(E20.10))') x_rec(i), tau(i), get_dtau(x_rec(i)), get_ddtau(x_rec(i))
+      write (1,*) tau(i), get_dtau(x_rec(i)), get_ddtau(x_rec(i))
 
-      write (2,'(4(E20.10))') x_rec(i), g(i), get_dg(x_rec(i)), get_ddg(x_rec(i))
-      write (3,'(2(E20.10))') x_rec(i), X_e(i)
+      write (2,*) g(i), get_dg(x_rec(i)), get_ddg(x_rec(i))
+      write (3,*) x_rec(i), z, X_e(i)
 
     end do
     
@@ -179,7 +180,7 @@ contains
     lambda_21s = 8.227d0
     
     C_r = (lambda_21s + lambda_alpha)/(lambda_21s + lambda_alpha + beta2)
-    !write(*,*) "dydx"
+
     dydx = C_r/H * (beta * (1.d0-X_e(1)) - n_b * alpha2 * X_e(1)**2)
 
   end subroutine dXe_dx
@@ -193,7 +194,7 @@ contains
     real(dp), dimension(:), intent(in)  :: tau
     real(dp), dimension(:), intent(out) :: dydx
     
-    dydx = -get_n_e(x) * sigma_T * exp(x)/get_H_p(x)
+    dydx = -get_n_e(x) * sigma_T * exp(x) * c/get_H_p(x)
 
   end subroutine dtau_dx
 
@@ -263,7 +264,7 @@ contains
     real(dp), intent(in) :: x
     real(dp)             :: get_dg
     
-    get_dg = splint_deriv(x_rec, g,g2,x)
+    get_dg = splint_deriv(x_rec, g, g2, x)
 
   end function get_dg
 
@@ -273,7 +274,6 @@ contains
 
     real(dp), intent(in) :: x
     real(dp)             :: get_ddg
-
 
     get_ddg = splint(x_rec, g2, g22, x)
 
