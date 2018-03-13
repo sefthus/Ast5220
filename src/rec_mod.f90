@@ -74,7 +74,7 @@ contains
           ! Use the Peebles equation
           
           X_e(i) = X_e(i-1)
-          call odeint(X_e(i:i), x_rec(i-1), x_rec(i), eps, step, stepmin, dX_edx, bsstep, output)
+          call odeint(X_e(i:i), x_rec(i-1), x_rec(i), eps, step, stepmin, dXe_dx, bsstep, output)
 
 
        end if
@@ -86,12 +86,13 @@ contains
     ! Task: Compute splined (log of) electron density function
     n_e = log(n_e)
     write(*,*) "splining ne"
-    call spline(x_rec, n_e, 1d30, 1d30, n_e2)
+    call spline(x_rec, n_e, 1.d30, 1.d30, n_e2)
 
     ! Task: Compute optical depth at all grid points
     write(*,*) "calculating tau"
+
     tau(n) = 0.d0 ! initial condition, present day value
-    do i = n-1,1,-1
+    do i = n-1, 1,-1
       tau(i)=tau(i+1)
       call odeint(tau(i:i), x_rec(i+1), x_rec(i), eps, step, stepmin, dtau_dx, bsstep, output)
     end do
@@ -99,10 +100,10 @@ contains
     
     ! Task: Compute splined (log of) optical depth
     write(*,*) "splining tau and ddtau"
-    call spline(x_rec, tau, 1d30,1d30, tau2)
+    call spline(x_rec, tau, 1.d30,1.d30, tau2)
 
     ! Task: Compute splined second derivative of (log of) optical depth
-    call spline(x_rec, tau2,1d30,1d30,tau22)
+    call spline(x_rec, tau2,1.d30,1.d30,tau22)
 
 !------------- visibility function g ---
 
@@ -113,9 +114,9 @@ contains
 
     ! Task: Compute splined visibility function
     write(*,*) "splining g and ddg"
-    call spline(x_rec, g, 1d30, 1d30, g2)
+    call spline(x_rec, g, 1.d30, 1.d30, g2)
     ! Task: Compute splined second derivative of visibility function
-    call spline(x_rec, g2, 1d30, 1d30, g22)
+    call spline(x_rec, g2, 1.d30, 1.d30, g22)
 
 
 !---------- write to file ---
@@ -127,9 +128,10 @@ contains
     write(*,*) "writing stuff"
     do i=1, n
       z = exp(-x_rec(i))-1
-      write (1,'(4(E17.8))') x_rec(i), tau(i), get_dtau(x_rec(i)), get_ddtau(x_rec(i))
-      write (2,'(4(E17.8))') x_rec(i), g(i), get_dg(x_rec(i)), get_ddg(x_rec(i))
-      write (3,'(2(E17.8))') z, X_e(i)
+      write (1,'(4(E20.10))') x_rec(i), tau(i), get_dtau(x_rec(i)), get_ddtau(x_rec(i))
+
+      write (2,'(4(E20.10))') x_rec(i), g(i), get_dg(x_rec(i)), get_ddg(x_rec(i))
+      write (3,'(2(E20.10))') x_rec(i), X_e(i)
 
     end do
     
@@ -142,34 +144,6 @@ contains
 
 
 !---------------------- Peebles equation ----
-  subroutine dX_edx(x, X_e, dydx)
-        use healpix_types
-        implicit none
-        real(dp),               intent(in)  :: x
-        real(dp), dimension(:), intent(in)  :: X_e
-        real(dp), dimension(:), intent(out) :: dydx
-        real(dp) :: T_b,n_b,phi2,alpha2,beta,beta2,n1s,lambda_alpha,C_r,H,lambda_2s1s
-        H      = get_H(x)
-        T_b    = T_0/exp(x)
-        n_b    = Omega_b*rho_c/(m_H*exp(x)**3)
-        phi2   = 0.448d0*log(epsilon_0/(k_b*T_b))
-        alpha2 = 64.d0*pi/sqrt(27.d0*pi)*(alpha/m_e)**2*sqrt(epsilon_0/(k_b*T_b))*phi2*hbar**2/c
-        beta   = alpha2 *((m_e*k_b*T_b)/(2.d0*pi*hbar**2))**1.5*exp(-epsilon_0/(k_b*T_b))
-
-        ! To avoid beta2 going to infinity, set it to 0
-        if(T_b <= 169.d0) then
-            beta2    = 0.d0
-        else
-            beta2    = beta*exp((3.d0*epsilon_0)/(4.d0*k_b*T_b))
-        end if
-        lambda_2s1s = 8.227d0
-        n1s          = (1.d0-X_e(1))*n_b
-        lambda_alpha = H*(3.d0*epsilon_0)**3/((8.d0*pi)**2*n1s) /(c*hbar)**3
-        C_r          = (lambda_2s1s +lambda_alpha)/(lambda_2s1s+lambda_alpha+beta2)
-        dydx         = C_r/H*(beta*(1.d0-X_e(1)) - n_b*alpha2*X_e(1)**2)
-
-    end subroutine dX_edx
-
 
   subroutine dXe_dx(x, X_e, dydx)
     ! we define dy/dx
@@ -219,7 +193,7 @@ contains
     real(dp), dimension(:), intent(in)  :: tau
     real(dp), dimension(:), intent(out) :: dydx
     
-    dydx = get_n_e(x) * sigma_T * exp(x)/get_H_p(x)
+    dydx = -get_n_e(x) * sigma_T * exp(x)/get_H_p(x)
 
   end subroutine dtau_dx
 
