@@ -24,7 +24,7 @@ plt.yscale('log')
 plt.xlim(-10,0)
 plt.grid('on', linestyle ='--')
 plt.tight_layout()
-plt.show()
+#plt.show()
 
 
 #--------------------------------- plotting g and derivatives
@@ -38,7 +38,7 @@ plt.legend(loc='upper right')
 plt.xlim(-7.5,-6.2)
 plt.grid('on', linestyle ='--')
 plt.tight_layout()
-plt.show()
+#plt.show()
 
 #----------------------------------- plotting X_e against z
 plt.figure()
