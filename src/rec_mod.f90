@@ -7,7 +7,7 @@ module rec_mod
   implicit none
 
   integer(i4b),                        private :: n                 ! Number of grid points
-  real(dp), allocatable, dimension(:), private :: x_rec             ! Grid
+  real(dp), allocatable, dimension(:), private :: x_rec,x_rec1             ! Grid
   real(dp), allocatable, dimension(:), private :: a_rec             ! Grid
 
   real(dp), allocatable, dimension(:), private :: tau, tau2, tau22  ! Splined tau and second derivatives
@@ -34,6 +34,7 @@ contains
     eps        = 1.d-10        ! spline error limit    
 
     allocate(x_rec(n))
+    allocate(x_rec1(n))
     allocate(X_e(n))
     allocate(tau(n))
     allocate(tau2(n))
@@ -49,8 +50,11 @@ contains
     x_rec(1) = xstart
     dx   = (xstop-xstart)/(n-1)
 
-    do i = 1, n-1
-       x_rec(i+1) = xstart + i*dx
+    do i = 2, n
+       x_rec(i) = x_rec(i-1) + dx
+       !write(*,*) "1", x_rec1(i+1)-x_rec1(i)
+       !x_rec(i) = xstart + (i-1)*dx
+       !write(*,*) "2", x_rec(i+1)-x_rec(i)
     end do
 
 
@@ -62,27 +66,25 @@ contains
     use_saha = .true.
     do i = 1, n
        !write(*,*) "loop 2"
-       n_b = Omega_b*rho_c/(m_H*exp(x_rec(i))**3)
+       n_b = Omega_b*rho_c/(m_H*exp(x_rec(i))**3.d0)
        if (use_saha) then
           ! Use the Saha equation
           T_b = T_0/exp(x_rec(i))
           X_e0 = ((m_e*k_b*T_b)/(2.d0*pi*hbar**2))**(1.5d0) * exp(-epsilon_0/(k_b * T_b))/n_b
-          X_e(i)= (-X_e0 + sqrt(X_e0**2 + 4.d0*X_e0))/2.d0
-
-         if (X_e(i) < saha_limit) use_saha = .false.
+          X_e(i)= (-X_e0 + sqrt(X_e0**2.d0 + 4.d0*X_e0))/2.d0
+          if (X_e(i) < saha_limit) use_saha = .false.
        else
           ! Use the Peebles equation
-          
           X_e(i) = X_e(i-1)
           call odeint(X_e(i:i), x_rec(i-1), x_rec(i), eps, step, stepmin, dXe_dx, bsstep, output)
-
+          !write(*,*) "Peebles"
 
        end if
        n_e(i) =X_e(i)*n_b
        write(*,*) "loop ",i
     end do
 
-    
+
     ! Task: Compute splined (log of) electron density function
     n_e = log(n_e)
     write(*,*) "splining ne"
@@ -160,11 +162,11 @@ contains
     H    = get_H(x)
     !write(*,*) "H"
     T_b  = T_0/exp(x)
-    n_b  = Omega_b*rho_c/(m_H*exp(x)**3)
+    n_b  = Omega_b*rho_c/(m_H*exp(3.d0*x))
 
     phi2 = 0.448d0*log(epsilon_0/(k_b * T_b))
     alpha2 = 64.d0*pi/sqrt(27.d0*pi) *(alpha/m_e)**2 *sqrt(epsilon_0/(k_b * T_b)) *phi2 *hbar**2/c
-    beta = alpha2*((m_e*k_b*T_b)/(2.d0*pi*hbar**2))**(1.5d0) * exp(-epsilon_0/(k_b * T_b))
+    beta = alpha2*((m_e*k_b*T_b)/(2.d0*pi*hbar*hbar))**(1.5d0) * exp(-epsilon_0/(k_b * T_b))
 
     !beta2 = beta * exp(3.d0*epsilon_0/(4.d0 * k_b*T_b))
     ! To avoid beta2 going to infinity, set it to 0
@@ -194,7 +196,7 @@ contains
     real(dp), dimension(:), intent(in)  :: tau
     real(dp), dimension(:), intent(out) :: dydx
     
-    dydx = -get_n_e(x) * sigma_T * exp(x) * c/get_H_p(x)
+    dydx = -get_n_e(x) * sigma_T * c/get_H(x)
 
   end subroutine dtau_dx
 
@@ -208,7 +210,8 @@ contains
     real(dp), intent(in) :: x
     real(dp)             :: get_n_e
     ! n_e is actually log(n_e)
-    get_n_e = exp(splint(x_rec, n_e, n_e2, x))
+    get_n_e = splint(x_rec, n_e, n_e2, x)
+    get_n_e = exp(get_n_e)
 
   end function get_n_e
 
@@ -230,7 +233,7 @@ contains
     real(dp), intent(in) :: x
     real(dp)             :: get_dtau
     
-    get_dtau = splint_deriv(x_rec,tau,tau2,x)
+    get_dtau = -splint_deriv(x_rec,tau,tau2,x)
 
   end function get_dtau
 
