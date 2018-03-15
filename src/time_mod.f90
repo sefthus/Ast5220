@@ -76,7 +76,7 @@ contains
     x_eta_int = (x_eta2 - x_eta1)/(n_eta - 1)
     x_eta(1) = x_eta1
     do i=1,n_eta-1
-       x_eta(i+1) = x_eta1 + i*x_eta_int
+       x_eta(i+1) = x_eta(i) + x_eta_int
     end do
 
     ! integrating to find eta

@@ -51,9 +51,9 @@ contains
     dx   = (xstop-xstart)/(n-1)
 
     do i = 2, n
-       x_rec(i) = x_rec(i-1) + dx
+       !x_rec(i) = x_rec(i-1) + dx
        !write(*,*) "1", x_rec1(i+1)-x_rec1(i)
-       !x_rec(i) = xstart + (i-1)*dx
+       x_rec(i) = xstart + (i-1)*dx
        !write(*,*) "2", x_rec(i+1)-x_rec(i)
     end do
 
@@ -65,23 +65,22 @@ contains
     write(*,*) "calculating X_e"
     use_saha = .true.
     do i = 1, n
-       !write(*,*) "loop 2"
+       write(*,*) "loop ", i
        n_b = Omega_b*rho_c/(m_H*exp(x_rec(i))**3.d0)
        if (use_saha) then
           ! Use the Saha equation
           T_b = T_0/exp(x_rec(i))
-          X_e0 = ((m_e*k_b*T_b)/(2.d0*pi*hbar**2))**(1.5d0) * exp(-epsilon_0/(k_b * T_b))/n_b
+          X_e0 = 1.d0/n_b*((m_e*k_b*T_b)/(2.d0*pi*hbar**2))**(1.5d0) * exp(-epsilon_0/(k_b * T_b))
           X_e(i)= (-X_e0 + sqrt(X_e0**2.d0 + 4.d0*X_e0))/2.d0
           if (X_e(i) < saha_limit) use_saha = .false.
        else
           ! Use the Peebles equation
+          !write(*,*) X_e(i)
           X_e(i) = X_e(i-1)
           call odeint(X_e(i:i), x_rec(i-1), x_rec(i), eps, step, stepmin, dXe_dx, bsstep, output)
-          !write(*,*) "Peebles"
 
        end if
        n_e(i) =X_e(i)*n_b
-       write(*,*) "loop ",i
     end do
 
 
@@ -155,7 +154,7 @@ contains
     real(dp),               intent(in)  :: x
     real(dp), dimension(:), intent(in)  :: X_e
     real(dp), dimension(:), intent(out) :: dydx
-    real(dp) :: beta, beta2, alpha2, n_b, n1s, lambda_21s, lambda_alpha
+    real(dp) :: beta, beta2, alpha2, n_b, n1s, lambda_2s1s, lambda_alpha
     real(dp) :: C_r, T_b, H, phi2  
     
     
@@ -165,12 +164,10 @@ contains
     n_b  = Omega_b*rho_c/(m_H*exp(3.d0*x))
 
     phi2 = 0.448d0*log(epsilon_0/(k_b * T_b))
-    alpha2 = 64.d0*pi/sqrt(27.d0*pi) *(alpha/m_e)**2 *sqrt(epsilon_0/(k_b * T_b)) *phi2 *hbar**2/c
+    alpha2 = 64.d0*pi/sqrt(27.d0*pi) *(alpha/m_e)**2 *sqrt(epsilon_0/(k_b * T_b)) *phi2 *hbar*hbar/c
     beta = alpha2*((m_e*k_b*T_b)/(2.d0*pi*hbar*hbar))**(1.5d0) * exp(-epsilon_0/(k_b * T_b))
 
-    !beta2 = beta * exp(3.d0*epsilon_0/(4.d0 * k_b*T_b))
     ! To avoid beta2 going to infinity, set it to 0
-
     if(T_b <= 169.d0) then
        beta2 = 0.d0
     else
@@ -179,9 +176,9 @@ contains
     n1s  = (1.d0 - X_e(1))* n_b ! X_e(1)
  
     lambda_alpha = H * (3.d0*epsilon_0)**3/((8.d0*pi)**2 * n1s)/(c*hbar)**3
-    lambda_21s = 8.227d0
+    lambda_2s1s = 8.227d0
     
-    C_r = (lambda_21s + lambda_alpha)/(lambda_21s + lambda_alpha + beta2)
+    C_r = (lambda_2s1s + lambda_alpha)/(lambda_2s1s + lambda_alpha + beta2)
 
     dydx = C_r/H * (beta * (1.d0-X_e(1)) - n_b * alpha2 * X_e(1)**2)
 
@@ -233,7 +230,7 @@ contains
     real(dp), intent(in) :: x
     real(dp)             :: get_dtau
     
-    get_dtau = -splint_deriv(x_rec,tau,tau2,x)
+    get_dtau = splint_deriv(x_rec,tau,tau2,x)
 
   end function get_dtau
 
