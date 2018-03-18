@@ -11,7 +11,6 @@ z, H 			= np.loadtxt("xeta_z_H.dat",usecols=(1,2), unpack=True)
 
 
 #------------------------------------- defining stuffu
-366
 Mpc = 3.08568025e22
 omega_total = omega_m+omega_b+omega_r+ omega_lambda
 eta = eta/Mpc # m --> Mpc units
