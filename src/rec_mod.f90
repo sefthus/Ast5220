@@ -75,7 +75,7 @@ contains
           if (X_e(i) < saha_limit) use_saha = .false.
        else
           ! Use the Peebles equation
-          !write(*,*) X_e(i)
+          ! write(*,*) X_e(i)
           X_e(i) = X_e(i-1)
           call odeint(X_e(i:i), x_rec(i-1), x_rec(i), eps, step, stepmin, dXe_dx, bsstep, output)
 
