@@ -29,12 +29,12 @@ plt.rc('font',**{'family':'serif','size':16})
 
 #----------------------------------- plotting X_e against z
 plt.figure()
-plt.plot(x,Xe)
-#plt.gca().invert_xaxis() # because z
+plt.plot(z,Xe)
+plt.gca().invert_xaxis() # because z
 plt.xlabel(r'$z$')
 plt.ylabel(r'$X_\mathrm{e}(z)$')
 plt.yscale('log')
-#plt.xlim(2000,0)
+plt.xlim(2000,0)
 plt.ylim(1e-4,1.4)
 plt.grid('on', linestyle ='--')
 plt.tight_layout()

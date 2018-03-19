@@ -23,7 +23,7 @@ contains
     real(dp)     :: saha_limit, y, T_b, n_b, dydx, xmin, xmax, dx, f, n_e0, X_e0, xstart, xstop
     logical(lgt) :: use_saha
     real(dp), allocatable, dimension(:) :: X_e ! Fractional electron density, n_e / n_H
-    real(dp)     :: step, stepmin, eps, z
+    real(dp)     :: step, stepmin, eps, z,tauu,dtauu,ddtauu
     !real(dp), dimension(1) :: y
 
     saha_limit = 0.99d0       ! Switch from Saha to Peebles when X_e < 0.99
@@ -97,8 +97,10 @@ contains
       tau(i) = tau(i+1)
       call odeint(tau(i:i), x_rec(i+1), x_rec(i), eps, step, stepmin, dtau_dx, bsstep, output)
     end do
+    ! --------- if log tau--
+    !tau = log(tau)
+    !tau(n)=-40.d0
 
-    
     ! Task: Compute splined (log of) optical depth
     write(*,*) "splining tau and ddtau"
     call spline(x_rec, tau, 1.d30,1.d30, tau2)
@@ -110,7 +112,10 @@ contains
 
     write(*,*) "calculating g"
     do i=1, n
-      g(i) = -get_dtau(x_rec(i)) * exp(-tau(i))
+      !tauu = exp(tau(i)) ! if log tau
+      !dtauu =get_dtau(x_rec(i))*tauu ! if log tau
+      dtauu =get_dtau(x_rec(i))!*tauu
+      g(i) = -dtauu * exp(-tau(i))
     end do
 
     ! Task: Compute splined visibility function
@@ -130,6 +135,11 @@ contains
     write(*,*) "writing stuff"
     do i=1, n
       z = exp(-x_rec(i))-1
+      ! --------- if log tau
+      !tauu = exp(tau(i))
+      !dtauu = tauu*get_dtau(x_rec(i))
+      !ddtauu = tauu*get_ddtau(x_rec(i)) + dtauu*dtauu/tauu
+      !write (1,*) tauu, dtauu, ddtauu
       write (1,*) tau(i), get_dtau(x_rec(i)), get_ddtau(x_rec(i))
 
       write (2,*) g(i), get_dg(x_rec(i)), get_ddg(x_rec(i))
