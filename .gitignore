@@ -76,6 +76,11 @@ Thumbs.db
 *.out
 *.tex
 *.log
+*.bib
+# other specific tex files
+*.bst
+*.cls
+
 # Binaries
 # --------
 *.dll
