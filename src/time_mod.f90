@@ -41,6 +41,7 @@ contains
     a_init      = 1.d-8                    ! Start value of a for eta evaluation
 
     x_eta1      = log(a_init)               ! Start value of x for eta evaluation
+    x_init      = log(a_init)
     x_eta2      = 0.d0                      ! End value of x for eta evaluation
 
     eps         = 1.d-8                        ! spline error limit 
@@ -50,7 +51,6 @@ contains
     allocate(x_t(n_t))
     allocate(a_t(n_t))
 
-    x_init = log(a_init)
     x_int1 = (x_end_rec - x_start_rec) /n1
     x_int2 = (x_0 - x_end_rec) /n2
 
