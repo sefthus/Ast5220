@@ -37,6 +37,8 @@ contains
     
     n_eta       = 1000                      ! Number of eta grid points (for spline)
     a_init      = 1.d-10                    ! Start value of a for eta evaluation
+    !a_init      = 1.d-8                    ! Start value of a for eta evaluation
+
     x_eta1      = log(a_init)               ! Start value of x for eta evaluation
     x_eta2      = 0.d0                      ! End value of x for eta evaluation
 

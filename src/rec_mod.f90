@@ -51,7 +51,7 @@ contains
     dx   = (xstop-xstart)/(n-1)
 
     do i = 2, n
-       !x_rec(i) = x_rec(i-1) + dx
+       x_rec(i) = x_rec(i-1) + dx
        !write(*,*) "1", x_rec1(i+1)-x_rec1(i)
        x_rec(i) = xstart + (i-1)*dx
        !write(*,*) "2", x_rec(i+1)-x_rec(i)

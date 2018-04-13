@@ -54,7 +54,7 @@ plt.plot( x, np.abs(ddtau), '-.', label = r"$|\tau''(x)|$")
 # some values
 plt.plot(x[idx],tau[idx],'x',label='Peebles start')
 plt.plot(x[idx2],tau[idx2],'x',label=r'$\tau$ decrease')
-plt.plot(x[idx3],tau[idx3],'x', label='r'$\tilde{g}_{max}$'')
+plt.plot(x[idx3],tau[idx3],'x', label=r'$\tilde{g}_{max}$')
 
 plt.xlabel(r'$x$')
 plt.ylabel(r"$\tau(x),\,|\tau'(x)|,\,|\tau''(x)|$")
