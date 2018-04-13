@@ -18,16 +18,17 @@ contains
   subroutine initialize_time_mod
     implicit none
 
-    integer(i4b) :: i, n, n1, n2
+    integer(i4b) :: i, n, n1, n2, n0
     real(dp)     :: z_start_rec, z_end_rec, z_0, x_start_rec, x_end_rec, x_0, dx, x_eta1, x_eta2, a_init
     real(dp)     :: x_init, x_int1, x_int2, x_eta_int, eps, step, stepmin, eta_init, rho_c
     real(dP)     :: H_scale, Omega_mx, Omega_bx, Omega_rx, Omega_lambdax, z
     real(dp), dimension(1) :: y 
 
     ! Define two epochs, 1) during and 2) after recombination.
+    n0          = 300                       ! Number of grid points before recombination
     n1          = 200                       ! Number of grid points during recombination
     n2          = 300                       ! Number of grid points after recombination
-    n_t         = n1 + n2                   ! Total number of grid points
+    n_t         = n1 + n2 + n0                 ! Total number of grid points
     z_start_rec = 1630.4d0                  ! Redshift of start of recombination
     z_end_rec   = 614.2d0                   ! Redshift of end of recombination
     z_0         = 0.d0                      ! Redshift today
@@ -36,8 +37,8 @@ contains
     x_0         = 0.d0                      ! x today
     
     n_eta       = 1000                      ! Number of eta grid points (for spline)
-    a_init      = 1.d-10                    ! Start value of a for eta evaluation
-    !a_init      = 1.d-8                    ! Start value of a for eta evaluation
+    !a_init      = 1.d-10                    ! Start value of a for eta evaluation
+    a_init      = 1.d-8                    ! Start value of a for eta evaluation
 
     x_eta1      = log(a_init)               ! Start value of x for eta evaluation
     x_eta2      = 0.d0                      ! End value of x for eta evaluation
@@ -49,19 +50,24 @@ contains
     allocate(x_t(n_t))
     allocate(a_t(n_t))
 
-    ! x_init = x_start_rec
-    x_int1 = (x_end_rec - x_start_rec) /(n1 - 1)
+    x_init = log(a_init)
+    x_int1 = (x_end_rec - x_start_rec) /n1
     x_int2 = (x_0 - x_end_rec) /n2
 
+    ! x grid before recombination !! Milestone 3
+    do i=1,n0
+       x_t(i) = x_init + (i-1)*(x_start_rec-x_init)/(n0-1)
+    end do
+
     ! x grid during recombination
-    x_t(1) = x_start_rec
-    do i=1,n1-1
-       x_t(i+1) = x_start_rec + i*x_int1
+    !x_t(1) = x_start_rec
+    do i=1,n1
+       x_t(n0+i) = x_start_rec + i*x_int1
     end do
 
     ! x grid after recombination
     do i=1,n2
-       x_t(n1+i) = x_end_rec + i*x_int2
+       x_t(n0+n1+i) = x_end_rec + i*x_int2
     end do
 
     ! a grid values
@@ -99,34 +105,34 @@ contains
 
 
     ! write stuff to file - x_eta. eta. eta splint, H, Omegas
-    open (unit=1, file = 'xt_eta_t.dat', status='replace')
-    open (unit=2, file = 'omega_mbrl.dat', status='replace')
-    open (unit=3, file = 'xeta_eta.dat', status='replace')
-    open (unit=4, file = 'xeta_z_H.dat', status='replace')
+    !open (unit=1, file = 'xt_eta_t.dat', status='replace')
+    !open (unit=2, file = 'omega_mbrl.dat', status='replace')
+    !open (unit=3, file = 'xeta_eta.dat', status='replace')
+    !open (unit=4, file = 'xeta_z_H.dat', status='replace')
 
-    do i=1,n_t 
-       write (1,'(2(E17.8))') x_t(i), get_eta(x_t(i))
-    end do
+    !do i=1,n_t 
+    !   write (1,'(2(E17.8))') x_t(i), get_eta(x_t(i))
+    !end do
     
-    do i=1, n_eta
+    !do i=1, n_eta
 
       ! calculate and write Omegas
-      H_scale       = H_0/get_H(x_eta(i))
-      Omega_mx      = Omega_m      * H_scale**2 * exp(x_eta(i))**(-3)
-      Omega_bx      = Omega_b      * H_scale**2 * exp(x_eta(i))**(-3)
-      Omega_rx      = Omega_r      * H_scale**2 * exp(x_eta(i))**(-4)
-      Omega_lambdax = Omega_lambda * H_scale**2
+    !  H_scale       = H_0/get_H(x_eta(i))
+    !  Omega_mx      = Omega_m      * H_scale**2 * exp(x_eta(i))**(-3)
+    !  Omega_bx      = Omega_b      * H_scale**2 * exp(x_eta(i))**(-3)
+    !  Omega_rx      = Omega_r      * H_scale**2 * exp(x_eta(i))**(-4)
+    !  Omega_lambdax = Omega_lambda * H_scale**2
 
-      z = exp(-x_eta(i))-1
-      write (2,'(4(E17.8))') Omega_mx, Omega_bx, Omega_rx, Omega_lambdax
-      write (3,'(2(E17.8))') x_eta(i), eta(i)
-      write (4,'(3(E17.8))') x_eta(i), z, get_H(x_eta(i))
+    !  z = exp(-x_eta(i))-1
+    !  write (2,'(4(E17.8))') Omega_mx, Omega_bx, Omega_rx, Omega_lambdax
+    !  write (3,'(2(E17.8))') x_eta(i), eta(i)
+    !  write (4,'(3(E17.8))') x_eta(i), z, get_H(x_eta(i))
 
-    end do
+    !end do
 
-    do i=1,4 ! close files
-      close(i)
-    end do
+    !do i=1,4 ! close files
+    !  close(i)
+    !end do
 
   end subroutine initialize_time_mod
 

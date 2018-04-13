@@ -9,8 +9,12 @@ program cmbspec
   ! Initialize time grids
   call initialize_time_mod
   call initialize_rec_mod
-  call initialize_evolution_mod
-  write(*,*) "hello wordl!"
+
+  write(*,*) "initializing evolution module"
+  call initialize_perturbation_eqns
+  call integrate_perturbation_eqns
+  call write_to_file_evolution_mod
+  write(*,*) "hello world!"
   ! Output to file desired quantities here
 
 end program cmbspec

@@ -127,30 +127,30 @@ contains
 
 
 !---------- write to file ---
-    write(*,*) "opening files "
-    open (unit=1, file = 'x_tau.dat', status='replace')
-    open (unit=2, file = 'x_g.dat', status='replace')
-    open (unit=3, file = 'x_z_Xe.dat', status='replace')
+    !write(*,*) "opening files "
+    !open (unit=1, file = 'x_tau.dat', status='replace')
+    !open (unit=2, file = 'x_g.dat', status='replace')
+    !open (unit=3, file = 'x_z_Xe.dat', status='replace')
     
-    write(*,*) "writing stuff"
-    do i=1, n
-      z = exp(-x_rec(i))-1
+    !write(*,*) "writing stuff"
+    !do i=1, n
+    !  z = exp(-x_rec(i))-1
       ! --------- if log tau
       !tauu = exp(tau(i))
       !dtauu = tauu*get_dtau(x_rec(i))
       !ddtauu = tauu*get_ddtau(x_rec(i)) + dtauu*dtauu/tauu
       !write (1,*) tauu, dtauu, ddtauu
-      write (1,*) tau(i), get_dtau(x_rec(i)), get_ddtau(x_rec(i))
+    !  write (1,*) tau(i), get_dtau(x_rec(i)), get_ddtau(x_rec(i))
 
-      write (2,*) g(i), get_dg(x_rec(i)), get_ddg(x_rec(i))
-      write (3,*) x_rec(i), z, X_e(i)
+    !  write (2,*) g(i), get_dg(x_rec(i)), get_ddg(x_rec(i))
+    !  write (3,*) x_rec(i), z, X_e(i)
 
-    end do
+    !end do
     
-    write(*,*) " closing files "
-    do i=1,3 ! close files
-      close(i)
-    end do
+    !write(*,*) " closing files "
+    !do i=1,3 ! close files
+    !  close(i)
+    !end do
 
   end subroutine initialize_rec_mod
 
