@@ -99,10 +99,10 @@ contains
     delta(0,:)   = 1.5d0 * Phi(0,:)
     delta_b(0,:) = delta(0,:)
     Theta(0,0,:) = 0.5d0*Phi(0,:)
-
+    x_init       = log(a_init)
     H_p          = get_H_p(x_init)
     dt           = get_dtau(x_init)
-    x_init       = log(a_init)
+
     do i = 1, n_k
        ckH_p        = c*ks(i)/H_p 
        
