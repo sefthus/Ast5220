@@ -8,6 +8,7 @@ module evolution_mod
 
   ! Accuracy parameters
   real(dp),     parameter, private :: a_init   = 1.d-8
+  real(dp),     parameter, private :: x_init   = log(a_init)
   real(dp),     parameter, private :: k_min    = 0.1d0 * H_0 / c
   real(dp),     parameter, private :: k_max    = 1.d3  * H_0 / c
   integer(i4b), parameter          :: n_k      = 100
@@ -70,7 +71,7 @@ contains
 
     integer(i4b) :: l, i
 
-    real(dp)     :: dks, H_p, ckH_p, dt, x_init
+    real(dp)     :: dks, H_p, ckH_p, dt
     ! Task: Initialize k-grid, ks; quadratic between k_min and k_max
     allocate(ks(n_k))
     do i = 1, n_k
@@ -99,7 +100,6 @@ contains
     delta(0,:)   = 1.5d0 * Phi(0,:)
     delta_b(0,:) = delta(0,:)
     Theta(0,0,:) = 0.5d0*Phi(0,:)
-    x_init       = log(a_init)
     H_p          = get_H_p(x_init)
     dt           = get_dtau(x_init)
 
@@ -123,14 +123,13 @@ contains
     implicit none
 
     integer(i4b) :: i, j, k, l, i_tc
-    real(dp)     :: x1, x2, x_init
+    real(dp)     :: x1, x2
     real(dp)     :: eps, hmin, h1, x_tc, H_p, dt, t1, t2
 
     real(dp)     :: ckH_p!, a_t
 
     real(dp), allocatable, dimension(:) :: y, y_tight_coupling, dydx
 
-    x_init = log(a_init)
     eps    = 1.d-8
     hmin   = 0.d0
     h1     = 1.d-5
@@ -258,14 +257,13 @@ contains
 
     real(dp), intent(in)  :: k
     real(dp)              :: get_tight_coupling_time
-    real(dp)              :: dt, H_p, x, x_init, x_start_rec, z_start_rec
+    real(dp)              :: dt, H_p, x, x_start_rec, z_start_rec
     integer(i4b)          :: i, n
 
     z_start_rec = 1630.4d0                  ! Redshift of start of recombination
     x_start_rec = -log(1.d0 + z_start_rec)  ! x of start of recombination
 
     n=1d4
-    x_init = log(a_init)
     do i=0,n
         x = x_init + i*(x_start_rec - x_init)/(n-1)
         dt      = get_dtau(x)
