@@ -92,10 +92,10 @@ contains
     allocate(dv_b(0:n_t, n_k))
     allocate(dTheta(0:n_t, 0:lmax_int, n_k))
     ! Task: Set up initial conditions for the Boltzmann and Einstein equations
-    Theta(:,:,:) = 0.d0
-    dTheta(:,:,:) = 0.d0
-    dPhi(:,:) = 0.d0
-    dPsi(:,:) = 0.d0
+    !Theta(:,:,:) = 0.d0
+    !dTheta(:,:,:) = 0.d0
+    !dPhi(:,:) = 0.d0
+    !dPsi(:,:) = 0.d0
 
     Phi(0,:)     = 1.d0
     delta(0,:)   = 1.5d0 * Phi(0,:)
@@ -428,7 +428,7 @@ contains
     end do
     
     write(*,*) "writing stuff"
-    do i=0, n_t
+    do i=0, n_t-1
       write (1,*) x_t(i)
       write (2,'(*(2X, ES14.6E3))') Phi(i,k(1)),Phi(i,k(2)),Phi(i,k(3)),Phi(i,k(4)),Phi(i,k(5)),Phi(i,k(6))
       write (3,'(*(2X, ES14.6E3))') Psi(i,k(1)),Psi(i,k(2)),Psi(i,k(3)),Psi(i,k(4)),Psi(i,k(5)),Psi(i,k(6))
