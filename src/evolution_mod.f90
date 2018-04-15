@@ -31,8 +31,10 @@ module evolution_mod
   real(dp), allocatable, dimension(:) :: ks
 
   ! Book-keeping variables
-  real(dp),     private :: k_current, ck
+  real(dp),     private :: k_current
   integer(i4b), private :: npar = 6+lmax_int
+
+  real(dp),     private :: ck, H_p, ckH_p, dt 
 
 contains
 
@@ -71,7 +73,6 @@ contains
 
     integer(i4b) :: l, i
 
-    real(dp)     :: dks, H_p, ckH_p, dt
     ! Task: Initialize k-grid, ks; quadratic between k_min and k_max
     allocate(ks(n_k))
     do i = 1, n_k
@@ -124,9 +125,8 @@ contains
 
     integer(i4b) :: i, j, k, l, i_tc
     real(dp)     :: x1, x2
-    real(dp)     :: eps, hmin, h1, x_tc, H_p, dt, t1, t2
+    real(dp)     :: eps, hmin, h1, x_tc, t1, t2
 
-    real(dp)     :: ckH_p!, a_t
 
     real(dp), allocatable, dimension(:) :: y, y_tight_coupling, dydx
 
@@ -171,7 +171,6 @@ contains
           ! some parameters
           ckH_p   = ck*get_H_p(x_t(i_tc))
           dt      = get_dtau(x_t(i_tc))
-          !a_t     = exp(x_t(i_tc))
 
           delta(i_tc,k)      = y_tight_coupling(1)
           delta_b(i_tc,k)    = y_tight_coupling(2)
@@ -213,7 +212,7 @@ contains
 
        write(*,*) "integrating non-tight coupling equations"
        do i = i_tc, n_t-1
-           !a_t = exp(x_t(i))
+
            !write(*,*) "after tc loop", i
           ! Task: Integrate equations from tight coupling to today
            call odeint(y, x_t(i-1), x_t(i),eps, h1, hmin, dy_dx, bsstep, output)
@@ -258,7 +257,7 @@ contains
 
     real(dp), intent(in)  :: k
     real(dp)              :: get_tight_coupling_time
-    real(dp)              :: dt, H_p, x, x_start_rec, z_start_rec
+    real(dp)              :: x, x_start_rec, z_start_rec
     integer(i4b)          :: i, n
 
     z_start_rec = 1630.4d0                  ! Redshift of start of recombination
@@ -266,10 +265,11 @@ contains
 
     n=1d4
     do i=0,n
-        x = x_init + i*(x_start_rec- x_init)/(n-1)
+        x = x_init + i*(0.d0- x_init)/n
         dt      = get_dtau(x)
         H_p     = get_H_p(x)
-        if (abs(dt) < 10.d0 .and. abs((c*k/H_p)/dt) > 0.1d0 .or. x>x_start_rec) then
+
+        if (abs(dt) > 10.d0 .and. abs((c*k/H_p)/dt) <= 0.1d0 .and. x<=x_start_rec) then
             get_tight_coupling_time = x
         end if
 
@@ -287,7 +287,7 @@ contains
 
     real(dp) :: delta, delta_b, v, v_b, Phi, Theta0, Theta1, Theta2, Psi
     real(dp) :: ddelta, ddelta_b, dv, dv_b, dPhi, dTheta0, dTheta1
-    real(dp) :: q, R, a, ckH_p, H_p, dH_p, dt, ddt
+    real(dp) :: q, R, a, dH_p, ddt
 
     delta      = y(1)
     delta_b    = y(2)
@@ -346,7 +346,7 @@ contains
     integer(i4b) :: l
     real(dp) :: delta, delta_b, v, v_b, Phi, Theta0, Theta1, Theta2, Psi
     real(dp) :: ddelta, ddelta_b, dv, dv_b, dPhi, dTheta0, dTheta1
-    real(dp) :: q, R, a, ckH_p, H_p, dt, eta
+    real(dp) :: q, R, a, eta
 
 
     ! what we take in, use in derivation
@@ -406,10 +406,10 @@ contains
     integer(i4b) :: i
     integer(i4b), dimension(6) :: k
     write(*,*) "writing to file; evolution_mod"    
-    !allocate(k(6))
+ 
     k(1:6)=(/1, 10, 30, 50, 80, 100 /)
-    write(*,*) "hei hei"
     !k(1:6)=(/1, 2, 3, 4, 5, 10 /)
+
 !---------- write to file ---
     write(*,*) "opening files "
     open (unit=0, file = 'k_ks.dat', status='replace')
@@ -421,6 +421,7 @@ contains
     open (unit=6, file = 'v.dat', status='replace')
     open (unit=7, file = 'v_b.dat', status='replace')
     open (unit=8, file = 'Theta0.dat', status='replace')
+    open (unit=9, file = 'Theta1.dat', status='replace')
     
     do i=1,6
         write(0,*) k(i),ks(k(i))
@@ -436,11 +437,12 @@ contains
       write (6,'(*(2X, ES14.6E3))') v(i,k(1)),v(i,k(2)),v(i,k(3)),v(i,k(4)),v(i,k(5)),v(i,k(6))
       write (7,'(*(2X, ES14.6E3))') v_b(i,k(1)),v_b(i,k(2)),v_b(i,k(3)),v_b(i,k(4)),v_b(i,k(5)),v_b(i,k(6))
       write (8,'(*(2X, ES14.6E3))') Theta(i,0,k(1)),Theta(i,0,k(2)),Theta(i,0,k(3)),Theta(i,0,k(4)),Theta(i,0,k(5)),Theta(i,0,k(6))
+      write (9,'(*(2X, ES14.6E3))') Theta(i,1,k(1)),Theta(i,1,k(2)),Theta(i,1,k(3)),Theta(i,1,k(4)),Theta(i,1,k(5)),Theta(i,1,k(6))
 
     end do
     
-    write(*,*) " closing files "
-    do i=0,8 ! close files
+    write(*,*) "closing files "
+    do i=0, 9
       close(i)
     end do
 

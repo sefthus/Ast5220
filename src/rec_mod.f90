@@ -49,14 +49,12 @@ contains
 
     ! Task: Fill in x (rec) grid
     write(*,*) "making x grid"
-    x_rec(1) = xstart
+    
     dx   = (xstop-xstart)/(n-1)
-
+    x_rec(1) = xstart
     do i = 1, n-1
        x_rec(i+1) = x_rec(i) + dx
-       !write(*,*) "1", x_rec1(i+1)-x_rec1(i)
        !x_rec(i) = xstart + (i-1)*dx
-       !write(*,*) "2", x_rec(i+1)-x_rec(i)
     end do
 
 
@@ -154,7 +152,7 @@ contains
     n_b  = Omega_b*rho_c/(m_H*exp(3.d0*x))
 
     phi2 = 0.448d0*log(epsilon_0/(k_b * T_b))
-    alpha2 = 64.d0*pi/sqrt(27.d0*pi) *(alpha*hbar/m_e)**2 *sqrt(epsilon_0/(k_b * T_b)) *phi2/c! *hbar*hbar/c
+    alpha2 = 64.d0*pi/sqrt(27.d0*pi) *(alpha*hbar/m_e)**2 *sqrt(epsilon_0/(k_b * T_b)) *phi2/c
     beta = alpha2*((m_e*k_b*T_b)/(2.d0*pi*hbar**2))**(1.5d0) * exp(-epsilon_0/(k_b * T_b))
 
     ! To avoid beta2 going to infinity, set it to 0
@@ -165,7 +163,7 @@ contains
     end if
     n1s  = (1.d0 - X_e(1))* n_b ! X_e(1)
  
-    lambda_alpha = H * (3.d0*epsilon_0/(c*hbar))**3/((8.d0*pi)**2 * n1s)!/(c*hbar)**3
+    lambda_alpha = H * (3.d0*epsilon_0/(c*hbar))**3/((8.d0*pi)**2 * n1s)
     lambda_2s1s = 8.227d0
     
     C_r = (lambda_2s1s + lambda_alpha)/(lambda_2s1s + lambda_alpha + beta2)
@@ -209,7 +207,6 @@ contains
     real(dp)             :: get_tau
     
     get_tau = splint(x_rec, tau, tau2, x)
-    !get_tau=exp(get_tau)
 
   end function get_tau
 
@@ -238,8 +235,6 @@ contains
     real(dp), intent(in) :: x
     real(dp)             :: get_ddtau
     get_ddtau = splint(x_rec, tau2, tau22, x)
-
-    !get_ddtau = get_tau(x)*get_ddtau + get_dtau(x)*get_dtau(x)/get_tau(x)
 
   end function get_ddtau
 
@@ -295,18 +290,18 @@ contains
     do i=1, n
       z = exp(-x_rec(i))-1
       ! --------- if log tau
-      !tauu = exp(tau(i))
+      !tauu = exp(get_tau(x_rec(i)))
       !dtauu = tauu*get_dtau(x_rec(i))
       !ddtauu = tauu*get_ddtau(x_rec(i)) + dtauu*dtauu/tauu
       !write (1,*) tauu, dtauu, ddtauu
-      write (1,*) tau(i), get_dtau(x_rec(i)), get_ddtau(x_rec(i))
 
-      write (2,*) g(i), get_dg(x_rec(i)), get_ddg(x_rec(i))
+      write (1,*) get_tau(x_rec(i)), get_dtau(x_rec(i)), get_ddtau(x_rec(i))
+      write (2,*) get_g(x_rec(i)), get_dg(x_rec(i)), get_ddg(x_rec(i))
       write (3,*) x_rec(i), z, X_e(i)
 
     end do
     
-    write(*,*) " closing files "
+    write(*,*) "closing files"
     do i=1,3 ! close files
       close(i)
     end do

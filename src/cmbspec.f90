@@ -14,9 +14,9 @@ program cmbspec
   call write_to_file_rec_mod
 
   write(*,*) "initializing evolution module"
-  !call initialize_perturbation_eqns
-  !call integrate_perturbation_eqns
-  !call write_to_file_evolution_mod
+  call initialize_perturbation_eqns
+  call integrate_perturbation_eqns
+  call write_to_file_evolution_mod
   write(*,*) "hello world!"
   ! Output to file desired quantities here
 
