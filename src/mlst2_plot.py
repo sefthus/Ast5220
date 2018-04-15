@@ -22,12 +22,18 @@ print "turning point tau: x=%.2f, z=%.2f, tau=%.2f" %( x[idx2],z[idx2], tau[idx2
 print 'peak of visibility function g - recombination'
 print '   x=%.2f, z=%.2f, g=%.2f, tau=%.2f, X_e=%.2f' % (x[idx3], z[idx3], g[idx3], tau[idx3],Xe[idx3])
 
+print Xe[0],tau[0],dtau[0],ddtau[0],x[0]
+print Xe[1],tau[1],dtau[1],ddtau[1],x[1]
+print Xe[-1],tau[-1],dtau[-1],ddtau[-1],x[-1]
+import sys
+#sys.exit()
 #print Xe
 #------------------------------ plotting
 plt.rc('text',usetex=True)
 plt.rc('font',**{'family':'serif','size':16})
 
 #----------------------------------- plotting X_e against z
+
 plt.figure()
 plt.plot(z,Xe)
 
@@ -41,7 +47,7 @@ plt.ylabel(r'$X_\mathrm{e}(z)$')
 plt.yscale('log')
 plt.xlim(2000,0)
 plt.ylim(1e-4,1.4)
-plt.grid('on', linestyle ='--')
+#plt.grid('on', linestyle ='--')
 plt.legend()
 plt.tight_layout()
 #plt.show()
@@ -61,10 +67,10 @@ plt.ylabel(r"$\tau(x),\,|\tau'(x)|,\,|\tau''(x)|$")
 plt.legend(loc='upper right')
 plt.yscale('log')
 #plt.xlim(-19.5,0)
-plt.grid('on', linestyle ='--')
+#plt.grid('on', linestyle ='--')
 plt.tight_layout()
-#plt.show()
-
+plt.show()
+sys.exit()
 
 #--------------------------------- plotting g and derivatives
 plt.figure()
@@ -80,7 +86,7 @@ plt.xlabel(r'$x$')
 plt.ylabel(r"$ \tilde{g}(x),\,\tilde{g}(x)'/10,\,\tilde{g}(x)''/300$")
 plt.legend(loc='upper right')
 plt.xlim(-7.5,-6.2)
-plt.grid('on', linestyle ='--')
+#plt.grid('on', linestyle ='--')
 plt.tight_layout()
 plt.show()
 

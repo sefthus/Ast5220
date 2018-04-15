@@ -45,6 +45,7 @@ for i in range(len(k)):
 plt.legend(loc='upper left')
 plt.ylabel(r'$\delta$')
 plt.xlabel(r'$x$')
+plt.yscale('log')
 #plt.grid('on', linestyle ='--')
 #plt.show()
 
@@ -54,6 +55,7 @@ for i in range(len(k)):
 plt.legend(loc='upper left')
 plt.ylabel(r'$\delta_b$')
 plt.xlabel(r'$x$')
+plt.yscale('log')
 #plt.grid('on', linestyle ='--')
 plt.show()
 

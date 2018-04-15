@@ -161,8 +161,8 @@ contains
        write(*,*) "k", k
        ! Task: Integrate from x_init until the end of tight coupling, using
        !       the tight coupling equations
-       write(*,*) "integrate tight coupling equations"
-       i_tc = 2
+       write(*,*) "integrating tight coupling equations"
+       i_tc = 1
 
        do while(x_t(i_tc)< x_tc)
           !write(*,*) "evol i_tc lopp!", i_tc
@@ -211,13 +211,14 @@ contains
           y(6+l) = Theta(i_tc-1,l,k)
        end do
 
-       
-       do i = i_tc, n_t
+       write(*,*) "integrating non-tight coupling equations"
+       do i = i_tc, n_t-1
            !a_t = exp(x_t(i))
            !write(*,*) "after tc loop", i
           ! Task: Integrate equations from tight coupling to today
            call odeint(y, x_t(i-1), x_t(i),eps, h1, hmin, dy_dx, bsstep, output)
           ! Task: Store variables at time step i in global variables
+          !write(*,*) "made it through"
           delta(i,k)   = y(1)
           delta_b(i,k) = y(2)
           v(i,k)       = y(3)
@@ -265,10 +266,10 @@ contains
 
     n=1d4
     do i=0,n
-        x = x_init + i*(x_start_rec - x_init)/(n-1)
+        x = x_init + i*(x_start_rec- x_init)/(n-1)
         dt      = get_dtau(x)
         H_p     = get_H_p(x)
-        if (abs(dt) < 10.d0 .and. abs((c*k/H_p)/dt) >= 0.1d0 .or. x>=x_start_rec) then
+        if (abs(dt) < 10.d0 .and. abs((c*k/H_p)/dt) > 0.1d0 .or. x>x_start_rec) then
             get_tight_coupling_time = x
         end if
 
@@ -404,9 +405,9 @@ contains
 
     integer(i4b) :: i
     integer(i4b), dimension(6) :: k
-    write(*,*) "writing to file"    
+    write(*,*) "writing to file; evolution_mod"    
     !allocate(k(6))
-    k(1:6)=(/1, 10, 30, 50, 75, 100 /)
+    k(1:6)=(/1, 10, 30, 50, 80, 100 /)
     write(*,*) "hei hei"
     !k(1:6)=(/1, 2, 3, 4, 5, 10 /)
 !---------- write to file ---
@@ -426,20 +427,20 @@ contains
     end do
     
     write(*,*) "writing stuff"
-    do i=1, n_t
+    do i=0, n_t
       write (1,*) x_t(i)
-      write (2,'(*(2X, ES14.6))') Phi(i,k(1)),Phi(i,k(2)),Phi(i,k(3)),Phi(i,k(4)),Phi(i,k(5)),Phi(i,k(6))
-      write (3,'(*(2X, ES14.6))') Psi(i,k(1)),Psi(i,k(2)),Psi(i,k(3)),Psi(i,k(4)),Psi(i,k(5)),Psi(i,k(6))
-      write (4,'(*(2X, ES14.6))') delta(i,k(1)),delta(i,k(2)),delta(i,k(3)),delta(i,k(4)),delta(i,k(5)),delta(i,k(6))
-      write (5,'(*(2X, ES14.6))') delta_b(i,k(1)),delta_b(i,k(2)),delta_b(i,k(3)),delta_b(i,k(4)),delta_b(i,k(5)),delta_b(i,k(6))
-      write (6,'(*(2X, ES14.6))') v(i,k(1)),v(i,k(2)),v(i,k(3)),v(i,k(4)),v(i,k(5)),v(i,k(6))
-      write (7,'(*(2X, ES14.6))') v_b(i,k(1)),v_b(i,k(2)),v_b(i,k(3)),v_b(i,k(4)),v_b(i,k(5)),v_b(i,k(6))
-      write (8,'(*(2X, ES14.6))') Theta(i,0,k(1)),Theta(i,0,k(2)),Theta(i,0,k(3)),Theta(i,0,k(4)),Theta(i,0,k(5)),Theta(i,0,k(6))
+      write (2,'(*(2X, ES14.6E3))') Phi(i,k(1)),Phi(i,k(2)),Phi(i,k(3)),Phi(i,k(4)),Phi(i,k(5)),Phi(i,k(6))
+      write (3,'(*(2X, ES14.6E3))') Psi(i,k(1)),Psi(i,k(2)),Psi(i,k(3)),Psi(i,k(4)),Psi(i,k(5)),Psi(i,k(6))
+      write (4,'(*(2X, ES14.6E3))') delta(i,k(1)),delta(i,k(2)),delta(i,k(3)),delta(i,k(4)),delta(i,k(5)),delta(i,k(6))
+      write (5,'(*(2X, ES14.6E3))') delta_b(i,k(1)),delta_b(i,k(2)),delta_b(i,k(3)),delta_b(i,k(4)),delta_b(i,k(5)),delta_b(i,k(6))
+      write (6,'(*(2X, ES14.6E3))') v(i,k(1)),v(i,k(2)),v(i,k(3)),v(i,k(4)),v(i,k(5)),v(i,k(6))
+      write (7,'(*(2X, ES14.6E3))') v_b(i,k(1)),v_b(i,k(2)),v_b(i,k(3)),v_b(i,k(4)),v_b(i,k(5)),v_b(i,k(6))
+      write (8,'(*(2X, ES14.6E3))') Theta(i,0,k(1)),Theta(i,0,k(2)),Theta(i,0,k(3)),Theta(i,0,k(4)),Theta(i,0,k(5)),Theta(i,0,k(6))
 
     end do
     
     write(*,*) " closing files "
-    do i=1,8 ! close files
+    do i=0,8 ! close files
       close(i)
     end do
 
