@@ -3,6 +3,8 @@ import matplotlib as mpl
 mpl.use('TkAgg') # Ensure that the Tkinter backend is used for generating figures
 import matplotlib.pyplot as plt
 
+
+
 #--------------------------- reading in data
 k, ks       = np.loadtxt("k_ks.dat",usecols=(0,1), unpack=True)
 x   	    = np.loadtxt("x_t.dat", unpack=True)
@@ -83,7 +85,7 @@ plt.show()
 # --------------- plot Phi and Psi
 plt.figure()
 [plt.plot(x, Phi[i], label=(r'$k=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
-plt.legend(loc='upper left')
+plt.legend(loc='lower left')
 plt.ylabel(r'$\Phi$')
 plt.xlabel(r'$x$')
 plt.tight_layout()
@@ -101,7 +103,7 @@ plt.tight_layout()
 # --------------- plot Theta_0 and Theta_1
 plt.figure()
 [plt.plot(x, Theta0[i], label=(r'$k=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
-plt.legend(loc='upper left')
+plt.legend(loc='lower left')
 plt.ylabel(r'$\Theta_0$')
 plt.xlabel(r'$x$')
 plt.tight_layout()
