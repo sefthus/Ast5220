@@ -62,7 +62,8 @@ plt.yscale('log')
 plt.tight_layout()
 #plt.grid('on', linestyle ='--')
 plt.show()
-
+import sys
+sys.exit()
 # ------------- plot velocities
 plt.figure()
 [plt.plot(x, v[i], label=(r'$k=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
