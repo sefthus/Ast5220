@@ -265,7 +265,7 @@ contains
 
     n=1d4
     do i=0,n
-        x = x_init + i*(0.d0- x_init)/n
+        x = x_init + i*(0.d0- x_init)/(n)
         dt      = get_dtau(x)
         H_p     = get_H_p(x)
 
@@ -395,7 +395,7 @@ contains
     dydx(6) = dTheta0
     dydx(7) = dTheta1
     ! dTheta6
-    dydx(6+l) = ckH_p*y(6+l-1) - c*(l+1.d0)/(H_p*eta)*y(6+l) + dt*y(6+l)
+    dydx(6+lmax_int) = ckH_p*y(6+lmax_int-1) - c*(lmax_int+1.d0)/(H_p*eta)*y(6+lmax_int) + dt*y(6+lmax_int)
 
   end subroutine dy_dx
 
