@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import matplotlib as mpl
 mpl.use('TkAgg') # Ensure that the Tkinter backend is used for generating figures
@@ -43,30 +44,29 @@ plt.rc('text',usetex=True)
 plt.rc('font',**{'family':'serif','size':16})
 
 #-------------- plot delta
-
 plt.figure()
-[plt.plot(x, delta[i], label=(r'$k=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
+[plt.plot(np.exp(x), delta[i], label=(r'$kc/H_0=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
+#[plt.plot(x, delta[i],'--') for i in range(len(k))]
 plt.legend(loc='upper left')
 plt.ylabel(r'$\delta$')
 plt.xlabel(r'$x$')
 plt.yscale('log')
+#plt.xscale('log')
 plt.tight_layout()
-#plt.grid('on', linestyle ='--')
-
+plt.show()
+sys.exit()
 plt.figure()
-[plt.plot(x, delta_b[i], label=(r'$k=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
+plt.gca().set_prop_cycle(None)
+[plt.plot(x, delta_b[i], label=(r'$kc/H_0=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
 plt.legend(loc='upper left')
 plt.ylabel(r'$\delta_b$')
 plt.xlabel(r'$x$')
 plt.yscale('log')
 plt.tight_layout()
-#plt.grid('on', linestyle ='--')
 plt.show()
-import sys
-sys.exit()
 # ------------- plot velocities
 plt.figure()
-[plt.plot(x, v[i], label=(r'$k=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
+[plt.plot(x, v[i], label=(r'$kc/H_0=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
 plt.legend(loc='upper left')
 plt.ylabel(r'$v$')
 plt.xlabel(r'$x$')
@@ -75,7 +75,7 @@ plt.tight_layout()
 #plt.show()
 
 plt.figure()
-[plt.plot(x, v_b[i], label=(r'$k=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
+[plt.plot(x, v_b[i], label=(r'$kc/H_0=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
 plt.legend(loc='upper left')
 plt.ylabel(r'$v_b$')
 plt.xlabel(r'$x$')
@@ -85,25 +85,25 @@ plt.show()
 
 # --------------- plot Phi and Psi
 plt.figure()
-[plt.plot(x, Phi[i], label=(r'$k=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
+[plt.plot(x, Phi[i], label=(r'$kc/H_0=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
 plt.legend(loc='lower left')
 plt.ylabel(r'$\Phi$')
 plt.xlabel(r'$x$')
 plt.tight_layout()
 #plt.grid('on', linestyle ='--')
-#plt.show()
 
 plt.figure()
-[plt.plot(x, Psi[i], label=(r'$k=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
+[plt.plot(x, Psi[i], label=(r'$kc/H_0=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
 plt.legend(loc='upper left')
 plt.ylabel(r'$\Psi$')
 plt.xlabel(r'$x$')
 plt.tight_layout()
 #plt.grid('on', linestyle ='--')
+plt.show()
 
 # --------------- plot Theta_0 and Theta_1
 plt.figure()
-[plt.plot(x, Theta0[i], label=(r'$k=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
+[plt.plot(x, Theta0[i], label=(r'$kc/H_0=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
 plt.legend(loc='lower left')
 plt.ylabel(r'$\Theta_0$')
 plt.xlabel(r'$x$')
@@ -111,7 +111,7 @@ plt.tight_layout()
 #plt.grid('on', linestyle ='--')
 
 plt.figure()
-[plt.plot(x, Theta1[i], label=(r'$k=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
+[plt.plot(x, Theta1[i], label=(r'$kc/H_0=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
 plt.legend(loc='upper left')
 plt.ylabel(r'$\Theta_1$')
 plt.xlabel(r'$x$')
@@ -119,4 +119,3 @@ plt.tight_layout()
 #plt.grid('on', linestyle ='--')
 
 plt.show()
-

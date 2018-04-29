@@ -61,11 +61,13 @@ contains
     ! Task: Compute X_e and n_e at all grid times
     step       = abs((x_rec(1) - x_rec(2))*1.d-3)     ! n-1 maybe integration step length
     stepmin    = 0.d0
+    
     ! Due to numerical error in Saha, change units to get smaller numbers
-    me = 510998.d0!(m_e/eV)
-    kb = 8.617d-5!k_b/eV
-    hbarc = 0.197d-6
-    epsilon0 = 13.605698d0
+    me = me*c*c/eV
+    kb = k_b/eV
+    hbarc = hbar*c
+    epsilon0 = epsilon_0/eV
+
     write(*,*) "calculating X_e"
     use_saha = .true.
     do i = 1, n
