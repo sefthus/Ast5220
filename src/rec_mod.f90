@@ -25,7 +25,7 @@ contains
     real(dp)     :: saha_limit, y, T_b, n_b, dydx, xmin, xmax, dx, f, n_e0, X_e0, xstart, xstop
     logical(lgt) :: use_saha
     real(dp)     :: step, stepmin, eps, z,tauu,dtauu,ddtauu
-    real(dp)     :: me, kb, hbarc, epsilon0, mkThbar_c, expekT
+    real(dp)     :: me, kb, hbarc, epsilon0, mkThbar_c, expekT,mH,rhoc
     !real(dp), dimension(1) :: y
 
     saha_limit = 0.99d0       ! Switch from Saha to Peebles when X_e < 0.99
@@ -52,9 +52,9 @@ contains
     
     dx   = (xstop-xstart)/(n-1)
     x_rec(1) = xstart
-    do i = 1, n-1
-       x_rec(i+1) = x_rec(i) + dx
-       !x_rec(i) = xstart + (i-1)*dx
+    do i = 1, n
+       !x_rec(i+1) = x_rec(i) + dx
+       x_rec(i) = xstart + (i-1)*dx
     end do
 
 
@@ -63,21 +63,24 @@ contains
     stepmin    = 0.d0
     
     ! Due to numerical error in Saha, change units to get smaller numbers
-    me = me*c*c/eV
+    me = m_e*c*c/eV
     kb = k_b/eV
-    hbarc = hbar*c
+    hbarc = hbar*c/eV
     epsilon0 = epsilon_0/eV
+    rhoc = rho_c*c*c/eV
+    mH = m_H*c*c/eV
 
     write(*,*) "calculating X_e"
     use_saha = .true.
+
     do i = 1, n
        write(*,*) "loop ", i
-       n_b = Omega_b*(rho_c/(m_H))/(exp(x_rec(i))**3)
-       
+       n_b = Omega_b*(rho_c/m_H)/(exp(x_rec(i))**3.d0)
+    
        if (use_saha) then
           ! Use the Saha equation
           T_b = T_0/exp(x_rec(i))
-          mkThbar_c =((me*kb*T_b)/(2.d0*pi*hbarc*hbarc))**(1.5d0)
+          mkThbar_c =((m_e*k_b*T_b)/(2.d0*pi*hbar**2.d0))**(1.5d0)
           expekT = exp(-epsilon_0/(k_b*T_b))
 
           X_e0 = 1.d0/n_b*mkThbar_c*expekT

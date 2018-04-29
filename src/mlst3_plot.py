@@ -45,7 +45,7 @@ plt.rc('font',**{'family':'serif','size':16})
 
 #-------------- plot delta
 plt.figure()
-[plt.plot(np.exp(x), delta[i], label=(r'$kc/H_0=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
+[plt.plot(x, delta[i], label=(r'$kc/H_0=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
 #[plt.plot(x, delta[i],'--') for i in range(len(k))]
 plt.legend(loc='upper left')
 plt.ylabel(r'$\delta$')
@@ -54,7 +54,8 @@ plt.yscale('log')
 #plt.xscale('log')
 plt.tight_layout()
 plt.show()
-sys.exit()
+#sys.exit()
+
 plt.figure()
 plt.gca().set_prop_cycle(None)
 [plt.plot(x, delta_b[i], label=(r'$kc/H_0=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
