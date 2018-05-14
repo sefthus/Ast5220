@@ -45,16 +45,12 @@ plt.rc('font',**{'family':'serif','size':16})
 
 #-------------- plot delta
 plt.figure()
-[plt.plot(np.exp(x), delta[i], label=(r'$kc/H_0=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
-#plt.plot(np.exp(x),np.exp(x)**2)
-plt.axvline(10**(-5))
-plt.axvline(10**(-4))
+[plt.plot(x, delta[i], label=(r'$kc/H_0=$'+"{0}".format(str(round(ks[i], 2))))) for i in range(len(k))]
 #[plt.plot(x, delta[i],'--') for i in range(len(k))]
 plt.legend(loc='upper left')
 plt.ylabel(r'$\delta$')
 plt.xlabel(r'$x$')
 plt.yscale('log')
-plt.xscale('log')
 plt.tight_layout()
 plt.show()
 sys.exit()
