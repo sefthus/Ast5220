@@ -4,6 +4,7 @@ module evolution_mod
   use time_mod
   use ode_solver
   use rec_mod
+  use spline_2D_mod
   implicit none
 
   ! Accuracy parameters
@@ -36,6 +37,10 @@ module evolution_mod
 
   real(dp),     private :: ck, H_p, ckH_p, dt 
 
+  ! Hires source function variables
+  integer(i4b), parameter             :: n_k_hires = 5000
+  integer(i4b), parameter             :: n_x_hires = 5000
+
 contains
 
 
@@ -47,20 +52,70 @@ contains
     real(dp), pointer, dimension(:,:), intent(out) :: S
 
     integer(i4b) :: i, j
-    real(dp)     :: g, dg, ddg, tau, dt, ddt, H_p, dH_p, ddHH_p, Pi, dPi, ddPi
+    real(dp)     :: g, dg, ddg, tau, dt, ddt, H_p, dH_p, ddHH_p, Pi, dPi, ddPi, ck
     real(dp), allocatable, dimension(:,:) :: S_lores
+    real(dp), allocatable, dimension(:,:,:,:) :: S_coeff
+
 
     ! Task: Output a pre-computed 2D array (over k and x) for the 
     !       source function, S(k,x). Remember to set up (and allocate) output 
     !       k and x arrays too. 
-    !
+    allocate(S_lores(n_t,n_k))
+    allocate(S_coeff(4,4,n_t,n_k))
+    allocate(x(n_x_hires))
+    allocate(k(n_k_hires))
+
+    ! Make grids
+    do i=1, n_x_hires
+      x(i) = x_init + x_init*(i-1.d0)/(n_x_hires-1.d0)
+      k(i) = k_min + (k_max-k_min)*(i-1.d0)/(n_k_hires-1.d0) ! not square
+    end do
+    
     ! Substeps:
     !   1) First compute the source function over the existing k and x
     !      grids
+   
+    do i=1,n_t
+        g    = get_g(x_t(i))
+        dg   = get_dg(x_t(i))
+        ddg  = get_ddg(x_t(i))
+        tau  = get_tau(x_t(i))
+        dt   = get_dtau(x_t(i))
+        ddt  = get_ddtau(x_t(i))
+        H_p  = get_H_p(x_t(i))
+        dH_p = get_dH_p(x_t(i))
+
+        do j=1,n_k
+            ck = c*ks(j)
+            ckH_p = ck/H_p
+            Pi   = Theta(i,2,j)
+            dPi  = dTheta(i,2,j)
+
+            ddPi = 2.d0/5.d0*ckH_p*(-dH_p/H_p*Theta(i,1,j) + dTheta(i,1,j)) &
+                  + 0.3d0*(ddt*Pi + dt*dPi)&
+                  - 3.d0/5.d0*ckH_p*(-dH_p/H_p*(Theta(i,3,j))+dTheta(i,3,j))
+
+            S_lores(i,j) = g*(Theta(i,0,j) + Psi(i,j) + 0.25d0*Pi)&
+                           + exp(-tau)*(dPsi(i,j) + dPhi(i,j)) &
+                           - 1.d0/ck*(g*v_b(i,j)*dH_p + H_p*(v_b(i,j)*dg + g*dv_b(i,j)))&
+                           + 0.75d0/ck**2*(g*Pi*H_0**2/2.d0*((Omega_b+Omega_m)/a_t(i) &
+                           + 4.d0*Omega_r/a_t(i)**2 + 4.d0*Omega_lambda*a_t(i)**2) &
+                           + 3.d0*H_p*dH_p*(Pi*dg + dPi*g) + H_p**2*(ddg*Pi + 2.d0*dg*dPi + g*ddPi))
+        end do
+
+    end do
+
     !   2) Then spline this function with a 2D spline
+    call splie2_full_precomp(x_t, ks, S_lores, S_coeff)
     !   3) Finally, resample the source function on a high-resolution uniform
     !      5000 x 5000 grid and return this, together with corresponding
     !      high-resolution k and x arrays
+    do i=1, n_x_hires
+      do j=1, n_k_hires
+        S(i,j) = splin2_full_precomp(x_t, ks, S_coeff, x(i), k(j))
+      end do
+    end do
+
 
   end subroutine get_hires_source_function
 
@@ -80,42 +135,42 @@ contains
     end do
     
     ! Allocate arrays for perturbation quantities
-    allocate(Theta(0:n_t, 0:lmax_int, n_k))
-    allocate(delta(0:n_t, n_k))
-    allocate(delta_b(0:n_t, n_k))
-    allocate(v(0:n_t, n_k))
-    allocate(v_b(0:n_t, n_k))
-    allocate(Phi(0:n_t, n_k))
-    allocate(Psi(0:n_t, n_k))
-    allocate(dPhi(0:n_t, n_k))
-    allocate(dPsi(0:n_t, n_k))
-    allocate(dv_b(0:n_t, n_k))
-    allocate(dTheta(0:n_t, 0:lmax_int, n_k))
+    allocate(Theta(n_t, 0:lmax_int, n_k))
+    allocate(delta(n_t, n_k))
+    allocate(delta_b(n_t, n_k))
+    allocate(v(n_t, n_k))
+    allocate(v_b(n_t, n_k))
+    allocate(Phi(n_t, n_k))
+    allocate(Psi(n_t, n_k))
+    allocate(dPhi(n_t, n_k))
+    allocate(dPsi(n_t, n_k))
+    allocate(dv_b(n_t, n_k))
+    allocate(dTheta(n_t, 0:lmax_int, n_k))
     ! Task: Set up initial conditions for the Boltzmann and Einstein equations
     !Theta(:,:,:) = 0.d0
     !dTheta(:,:,:) = 0.d0
     !dPhi(:,:) = 0.d0
     !dPsi(:,:) = 0.d0
 
-    Phi(0,:)     = 1.d0
-    delta(0,:)   = 1.5d0 * Phi(0,:)
-    delta_b(0,:) = delta(0,:)
-    Theta(0,0,:) = 0.5d0*Phi(0,:)
+    Phi(1,:)     = 1.d0
+    delta(1,:)   = 1.5d0 * Phi(1,:)
+    delta_b(1,:) = delta(1,:)
+    Theta(1,0,:) = 0.5d0*Phi(1,:)
     H_p          = get_H_p(x_init)
     dt           = get_dtau(x_init)
 
     do i = 1, n_k
        ckH_p        = c*ks(i)/H_p 
        
-       v(0,i)       = ckH_p/2.d0*Phi(0,i)
-       v_b(0,i)     = v(0,i)
+       v(1,i)       = ckH_p/2.d0*Phi(1,i)
+       v_b(1,i)     = v(1,i)
 
-       Theta(0,1,i) = -ckH_p/6.d0*Phi(0,i)
-       Theta(0,2,i) = -20.d0/45.d0*ckH_p/(dt)*Theta(0,1,i)
+       Theta(1,1,i) = -ckH_p/6.d0*Phi(1,i)
+       Theta(1,2,i) = -20.d0/45.d0*ckH_p/(dt)*Theta(1,1,i)
        do l = 3, lmax_int
-          Theta(0,l,i) = - l/(2.d0*l + 1.d0)*ckH_p/dt *Theta(0,l-1,i)
+          Theta(1,l,i) = - l/(2.d0*l + 1.d0)*ckH_p/dt *Theta(1,l-1,i)
        end do
-       Psi(0,i) = - Phi(0,i) - 12.d0*(H_0/(c*ks(i)*a_init))**2.d0*Omega_r*Theta(0,2,i)
+       Psi(1,i) = - Phi(1,i) - 12.d0*(H_0/(c*ks(i)*a_init))**2.d0*Omega_r*Theta(1,2,i)
     end do
 
   end subroutine initialize_perturbation_eqns
@@ -145,13 +200,13 @@ contains
        ck = c*k_current
 
        ! Initialize equation set for tight coupling
-       y_tight_coupling(1) = delta(0,k)
-       y_tight_coupling(2) = delta_b(0,k)
-       y_tight_coupling(3) = v(0,k)
-       y_tight_coupling(4) = v_b(0,k)
-       y_tight_coupling(5) = Phi(0,k)
-       y_tight_coupling(6) = Theta(0,0,k)
-       y_tight_coupling(7) = Theta(0,1,k)
+       y_tight_coupling(1) = delta(1,k)
+       y_tight_coupling(2) = delta_b(1,k)
+       y_tight_coupling(3) = v(1,k)
+       y_tight_coupling(4) = v_b(1,k)
+       y_tight_coupling(5) = Phi(1,k)
+       y_tight_coupling(6) = Theta(1,0,k)
+       y_tight_coupling(7) = Theta(1,1,k)
        
        ! Find the time to which tight coupling is assumed, 
        ! and integrate equations to that time
@@ -162,7 +217,7 @@ contains
        ! Task: Integrate from x_init until the end of tight coupling, using
        !       the tight coupling equations
        write(*,*) "integrating tight coupling equations"
-       i_tc = 1
+       i_tc = 2
 
        do while(x_t(i_tc)< x_tc)
           !write(*,*) "evol i_tc lopp!", i_tc
@@ -211,7 +266,7 @@ contains
        end do
 
        write(*,*) "integrating non-tight coupling equations"
-       do i = i_tc, n_t-1
+       do i = i_tc, n_t
 
            !write(*,*) "after tc loop", i
           ! Task: Integrate equations from tight coupling to today
@@ -428,7 +483,7 @@ contains
     end do
     
     write(*,*) "writing stuff"
-    do i=0, n_t-1
+    do i=1, n_t
       write (1,*) x_t(i)
       write (2,'(*(2X, ES14.6E3))') Phi(i,k(1)),Phi(i,k(2)),Phi(i,k(3)),Phi(i,k(4)),Phi(i,k(5)),Phi(i,k(6))
       write (3,'(*(2X, ES14.6E3))') Psi(i,k(1)),Psi(i,k(2)),Psi(i,k(3)),Psi(i,k(4)),Psi(i,k(5)),Psi(i,k(6))

@@ -48,26 +48,26 @@ contains
     eta_init    = c/get_H_p(x_eta1)!*a_init/(H0*sqrt(Omega_r)) ! eta initial value at a=0
 
     ! Task: Fill in x and a grids
-    allocate(x_t(0:n_t))
-    allocate(a_t(0:n_t))
+    allocate(x_t(n_t))
+    allocate(a_t(n_t))
 
     x_int1 = (x_end_rec - x_start_rec) /n1
     x_int2 = (x_0 - x_end_rec) /n2
 
     ! x grid before recombination !! Milestone 3
-    do i=0,n0-1
-       x_t(i) = x_init + (i)*(x_start_rec-x_init)/(n0-1)
+    do i=1,n0
+       x_t(i) = x_init + (i-1)*(x_start_rec-x_init)/(n0-1)
     end do
 
     ! x grid during recombination
     !x_t(1) = x_start_rec
-    do i=0,n1-1
-       x_t(n0+i) = x_start_rec + (i+1)*x_int1
+    do i=1,n1
+       x_t(n0+i) = x_start_rec + (i)*x_int1
     end do
 
     ! x grid after recombination
-    do i=0,n2-1
-       x_t(n0+n1+i) = x_end_rec + (i+1)*x_int2
+    do i=1,n2
+       x_t(n0+n1+i) = x_end_rec + (i)*x_int2
     end do
 
     ! a grid values

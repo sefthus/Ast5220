@@ -20,8 +20,9 @@ contains
     real(dp),     pointer,     dimension(:,:,:,:) :: S_coeff
     real(dp),     pointer,     dimension(:,:)     :: S, S2
     real(dp),     allocatable, dimension(:,:)     :: Theta
+    real(dp),     allocatable, dimension(:,:)     :: Theta_l,integrand2
     real(dp),     allocatable, dimension(:)       :: z_spline, j_l_spline, j_l_spline2
-    real(dp),     allocatable, dimension(:)       :: x_hires, k_hires
+    real(dp),     allocatable, dimension(:)       :: x_hires, k_hires, x_lores
 
     real(dp)           :: t1, t2, integral
     logical(lgt)       :: exist
@@ -36,7 +37,10 @@ contains
          & 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1050, 1100, 1150, 1200 /)
 
     ! Task: Get source function from evolution_mod
-
+    allocate(S(n_x_highres,n_k_highres))
+    allocate(x_hires(n_x_highres))
+    allocate(k_hires(n_k_highres))
+    call get_hires_source_function(k_hires, x_hires, S)
 
     ! Task: Initialize spherical Bessel functions for each l; use 5400 sampled points between 
     !       z = 0 and 3500. Each function must be properly splined
@@ -48,12 +52,61 @@ contains
     allocate(j_l(n_spline, l_num))
     allocate(j_l2(n_spline, l_num))
 
+    do i=1,n_spline
+      z_spline(i) = (i-1)*3500.d0/(n_spline-1.d0)
+    end do
+
+    ! checking for binary file
+    filename = 'j_l.bin'
+    inquire(file=filename, exist=exist)
+    if (exist) then
+       open(10, form='unformatted', file=filename)
+       read(10) j_l, j_l2
+       close(10)
+    else
+      write(*,*) "compute spherical Bessel functions"
+      do i=1, n_spline
+        do l=1, l_num
+          if (z_spline(i) > 2.d0) then
+              call sphbes(ls(l),z_pline(i),j_l(i,l))
+          end if
+        end do
+      end do
+
+        ! spline bessel functions across z for all l
+      write(*,*) "spline bessel functions"
+      do l=1,l_num
+        call spline(z_spline, j_l(:,1), 1.0d30, 1.0d30, j_l2(:,1))
+      end do
+      ! Write to file
+      open(10, form='unformatted', file=filename)
+      write(10) j_l, j_l2
+      close(10)
+    end if
+
+    allocate(Theta(l_num,n_k_highres))
+    allocate(int_arg(n_hires))
+    allocate(integrand(n_x_highres))
+    allocate(integrand2(l_num,n_k_highres))
+    allocate(cls(l_num))
+    allocate(cls2(l_num))
+    allocate(x_lores(n_hires/10)) ! creating low-res x grid for fast Theta-integration
 
     ! Overall task: Compute the C_l's for each given l
     do l = 1, l_num
-
        ! Task: Compute the transfer function, Theta_l(k)
+       do j = 1, n_hires
+          do i =1, n_hires/10
+            if (i<=300) then
+                m = 1 + (1-a)*(i_rec-1)/(300-1)
+            else
+                m = i_rec + (i-301)*(n_hires-i_rec)/199
+            end if
 
+            x_lores(i) = x_hires(m)
+            integrand(i) = S(m,j)*splint(z_spline,j_l(:,l),j_l2(:,l), k_hires(j)*(get_eta(0.d0)-get_eta(x_hires(m))))
+            end do
+          call trapz(x_lores,integrand(1:500),Theta(l,j))
 
        ! Task: Integrate P(k) * (Theta_l^2 / k) over k to find un-normalized C_l's
 
@@ -68,4 +121,25 @@ contains
 
   end subroutine compute_cls
   
+  subroutine trapz(x,y,integral) ! Trapezoidal method
+    implicit none
+    real(dp), dimension(:), intent(in)  :: x,y
+    real(dp),               intent(out) :: integral
+    integer(i4b)                        :: n, i
+    real(dp)                            :: h
+
+    if (size(x) .ne. size(y)) then
+       write(*,*) 'x and y does not have same shape'
+       return
+    end if
+
+    integral = 0.d0
+    n = size(x)
+    h = (x(n) - x(1))/n
+    do i=1, n-1
+       integral = integral + h*(y(i)+y(i+1))/2.d0
+    end do
+
+  end subroutine trapz
+
 end module cl_mod
