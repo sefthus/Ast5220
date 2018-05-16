@@ -40,13 +40,13 @@ contains
     ls = (/ 2, 3, 4, 6, 8, 10, 12, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, &
          & 120, 140, 160, 180, 200, 225, 250, 275, 300, 350, 400, 450, 500, 550, &
          & 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1050, 1100, 1150, 1200 /)
-
+    write(*,*) "hei 1"
     ! Task: Get source function from evolution_mod
     allocate(S(n_x_hires,n_k_hires))
     allocate(x_hires(n_x_hires))
     allocate(k_hires(n_k_hires))
     call get_hires_source_function(k_hires, x_hires, S)
-
+    write(*,*) 'made the call to evol_mod'
     ! Task: Initialize spherical Bessel functions for each l; use 5400 sampled points between 
     !       z = 0 and 3500. Each function must be properly splined
     ! Hint: It may be useful for speed to store the splined objects on disk in an unformatted
@@ -60,7 +60,7 @@ contains
     do i=1,n_spline
       z_spline(i) = (i-1)*3500.d0/(n_spline-1.d0)
     end do
-    stop
+    
     ! checking for binary file
     filename = 'j_l.bin'
     inquire(file=filename, exist=exist)
@@ -101,6 +101,7 @@ contains
     do l = 1, l_num
        ! Task: Compute the transfer function, Theta_l(k)
       ! start trapezoidal x
+      write(*,*) 'start trapezoidal for theta_l'
       do j=1, n_k_hires       
 	!do j = 1, n_x_hires
           !do i =1, n_x_hires/10
@@ -121,6 +122,7 @@ contains
 
        ! Task: Integrate P(k) * (Theta_l^2 / k) over k to find un-normalized C_l's
        ! start trapezoidal k
+      write(*,*) 'start trapezoidal for cl'
       do j=1,n_k_hires
         integrand2(j) = (c*k_hires(j)/H_0)**(n_s-1.d0)*Theta_l(l,j)**2/k_hires(j)
       end do 
@@ -196,11 +198,13 @@ contains
     open (unit=2, file = 'Theta_l.dat', status='replace')
     open (unit=3, file = 'ls.dat', status='replace')
     open (unit=4, file = 'C_l.dat', status='replace')
+    !open (unit=4, file = 'C_l_integrand.dat', status='replace')
     
     write(*,*) "writing stuff"
     do i=1, n_x_hires
       write (0,*) x_hires(i)
-      write (1,'(*(2X, ES14.6E3))')S(i,j(1)),S(i,j(2)),S(i,j(3)),S(i,j(4)),S(i,j(5)),S(i,j(6))
+      write (1,'(*(2X, ES14.6E3))') S(i,j(1)),S(i,j(2)),S(i,j(3)),S(i,j(4)),S(i,j(5)),S(i,j(6))
+      !write(11,'(*(2X, ES14.6E3))') Theta_l(l,j(1)),Theta_l(l,j(2)),Theta_l(l,j(3)),Theta_l(l,j(4)),Theta_l(l,j(5)),Theta_l(l,j(6))
     end do
 
     do l=1, 44
