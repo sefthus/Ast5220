@@ -48,7 +48,7 @@ contains
   subroutine get_hires_source_function(k, x, S)
     implicit none
 
-    real(dp), pointer, dimension(:),   intent(out) :: k, x
+    real(dp), allocatable, dimension(:),   intent(out) :: k, x
     real(dp), pointer, dimension(:,:), intent(out) :: S
 
     integer(i4b) :: i, j

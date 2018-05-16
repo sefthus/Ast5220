@@ -4,6 +4,7 @@ program cmbspec
   use time_mod
   use rec_mod
   use evolution_mod
+  use cl_mod
   implicit none
 
   ! Initialize time grids
@@ -17,10 +18,14 @@ program cmbspec
   call initialize_perturbation_eqns
   call integrate_perturbation_eqns
 
+  write(*,*) " initialize cl module"
+  call compute_cls
+
   write(*,*) "hello world!"
   ! Output to file desired quantities here
  
   !call write_to_file_time_mod
   !call write_to_file_rec_mod
   !call write_to_file_evolution_mod
+  call write_to_file_cl_mod
 end program cmbspec

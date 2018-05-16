@@ -2,8 +2,14 @@ module cl_mod
   use healpix_types
   use evolution_mod
   use sphbess_mod
+  use spline_1D_mod
   implicit none
 
+  real(dp),     pointer,     dimension(:,:)     :: S, S2
+  integer(i4b), allocatable, dimension(:)       :: ls
+  real(dp), allocatable, dimension(:)       :: ls_hires, cls_hires
+  real(dp),     allocatable, dimension(:)       :: x_hires, k_hires
+  real(dp),     allocatable, dimension(:,:)     :: Theta_l
 contains
 
   ! Driver routine for (finally!) computing the CMB power spectrum
@@ -12,17 +18,16 @@ contains
 
     integer(i4b) :: i, j, l, l_num, x_num, n_spline
     real(dp)     :: dx, S_func, j_func, z, eta, eta0, x0, x_min, x_max, d, e
-    integer(i4b), allocatable, dimension(:)       :: ls
-    real(dp),     allocatable, dimension(:)       :: integrand
+
+    real(dp),     allocatable, dimension(:)       :: integrand, integrand2
     real(dp),     pointer,     dimension(:,:)     :: j_l, j_l2
     real(dp),     pointer,     dimension(:)       :: x_arg, int_arg, cls, cls2, ls_dp
     real(dp),     pointer,     dimension(:)       :: k, x
     real(dp),     pointer,     dimension(:,:,:,:) :: S_coeff
-    real(dp),     pointer,     dimension(:,:)     :: S, S2
-    real(dp),     allocatable, dimension(:,:)     :: Theta
-    real(dp),     allocatable, dimension(:,:)     :: Theta_l,integrand2
+
+    !real(dp),     allocatable, dimension(:,:)     :: integrand2
     real(dp),     allocatable, dimension(:)       :: z_spline, j_l_spline, j_l_spline2
-    real(dp),     allocatable, dimension(:)       :: x_hires, k_hires, x_lores
+    real(dp),     allocatable, dimension(:)       :: x_lores
 
     real(dp)           :: t1, t2, integral
     logical(lgt)       :: exist
@@ -37,9 +42,9 @@ contains
          & 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1050, 1100, 1150, 1200 /)
 
     ! Task: Get source function from evolution_mod
-    allocate(S(n_x_highres,n_k_highres))
-    allocate(x_hires(n_x_highres))
-    allocate(k_hires(n_k_highres))
+    allocate(S(n_x_hires,n_k_hires))
+    allocate(x_hires(n_x_hires))
+    allocate(k_hires(n_k_hires))
     call get_hires_source_function(k_hires, x_hires, S)
 
     ! Task: Initialize spherical Bessel functions for each l; use 5400 sampled points between 
@@ -55,7 +60,7 @@ contains
     do i=1,n_spline
       z_spline(i) = (i-1)*3500.d0/(n_spline-1.d0)
     end do
-
+    stop
     ! checking for binary file
     filename = 'j_l.bin'
     inquire(file=filename, exist=exist)
@@ -68,7 +73,7 @@ contains
       do i=1, n_spline
         do l=1, l_num
           if (z_spline(i) > 2.d0) then
-              call sphbes(ls(l),z_pline(i),j_l(i,l))
+            call sphbes(ls(l),z_spline(i),j_l(i,l))
           end if
         end do
       end do
@@ -84,40 +89,71 @@ contains
       close(10)
     end if
 
-    allocate(Theta(l_num,n_k_highres))
-    allocate(int_arg(n_hires))
-    allocate(integrand(n_x_highres))
-    allocate(integrand2(l_num,n_k_highres))
+    allocate(Theta_l(l_num,n_k_hires))
+    allocate(int_arg(n_x_hires))
+    allocate(integrand(n_x_hires))
+    allocate(integrand2(n_k_hires))
     allocate(cls(l_num))
     allocate(cls2(l_num))
-    allocate(x_lores(n_hires/10)) ! creating low-res x grid for fast Theta-integration
+    allocate(x_lores(n_x_hires/10)) ! creating low-res x grid for fast Theta_l-integration
 
     ! Overall task: Compute the C_l's for each given l
     do l = 1, l_num
        ! Task: Compute the transfer function, Theta_l(k)
-       do j = 1, n_hires
-          do i =1, n_hires/10
-            if (i<=300) then
-                m = 1 + (1-a)*(i_rec-1)/(300-1)
-            else
-                m = i_rec + (i-301)*(n_hires-i_rec)/199
-            end if
+      ! start trapezoidal x
+      do j=1, n_k_hires       
+	!do j = 1, n_x_hires
+          !do i =1, n_x_hires/10
+          !  if (i<=300) then
+          !      m = 1 + (1-a)*(i_rec-1)/(300-1)
+          !  else
+          !      m = i_rec + (i-301)*(n_x_hires-i_rec)/199
+          !  end if
 
-            x_lores(i) = x_hires(m)
-            integrand(i) = S(m,j)*splint(z_spline,j_l(:,l),j_l2(:,l), k_hires(j)*(get_eta(0.d0)-get_eta(x_hires(m))))
-            end do
-          call trapz(x_lores,integrand(1:500),Theta(l,j))
+          !  x_lores(i) = x_hires(m)
+        do i=1, n_x_hires
+          integrand(i) = S(i,j)*splint(z_spline,j_l(:,l),j_l2(:,l), k_hires(j)*(get_eta(0.d0)-get_eta(x_hires(i))))
+        end do
+
+        call trapz(x_hires,integrand,Theta_l(l,j))
+      end do
+        ! end trapezoidal x
 
        ! Task: Integrate P(k) * (Theta_l^2 / k) over k to find un-normalized C_l's
-
-
+       ! start trapezoidal k
+      do j=1,n_k_hires
+        integrand2(j) = (c*k_hires(j)/H_0)**(n_s-1.d0)*Theta_l(l,j)**2/k_hires(j)
+      end do 
+      call trapz(k_hires,integrand2, integral)
        ! Task: Store C_l in an array. Optionally output to file
-
+       cls(l) = integral*ls(l)*(ls(l)+1.d0)/(2.d0*pi)
+        ! end trapezoidal method k
     end do
 
 
     ! Task: Spline C_l's found above, and output smooth C_l curve for each integer l
+    allocate(ls_dp(l_num))
+    allocate(ls_hires(int(maxval(ls))))
+    allocate(cls_hires(int(maxval(ls))))
 
+    do l=1, l_num   ! spline requires double precision
+        ls_dp(l) = ls(l)
+    end do
+
+    write(*,*) 'splining cls'
+    call spline(ls_dp, cls, 1.d30, 1.d30, cls2)
+
+    ! new unit stepsize l-grid
+    write(*,*) 'making new highresolution l-grid'
+    do l=1, int(maxval(ls))
+      ls_hires(l) = l
+    end do
+
+    ! find Cls for all ls_hires
+    write(*,*) 'saving splined cls'
+    do l=1, int(maxval(ls))
+      cls_hires(l) = splint(ls_dp, cls, cls2, ls_hires(l))
+    end do
 
   end subroutine compute_cls
   
@@ -139,7 +175,47 @@ contains
     do i=1, n-1
        integral = integral + h*(y(i)+y(i+1))/2.d0
     end do
-
+    integral = integral*h
   end subroutine trapz
 
+
+  subroutine write_to_file_cl_mod
+     use healpix_types
+    implicit none
+
+    integer(i4b) :: i, l
+    integer(i4b), dimension(6) :: j
+    j(1:6)=(/50, 250, 500, 2000, 3000, 5000 /)
+    !j(1:6)=(/1, 2, 3, 4, 5, 10 /)
+    write(*,*) "writing to file; cl_mod"    
+
+!---------- write to file ---
+    write(*,*) "opening files "
+    open (unit=0, file = 'x_hires.dat', status='replace')
+    open (unit=1, file = 'source_func.dat', status='replace')
+    open (unit=2, file = 'Theta_l.dat', status='replace')
+    open (unit=3, file = 'ls.dat', status='replace')
+    open (unit=4, file = 'C_l.dat', status='replace')
+    
+    write(*,*) "writing stuff"
+    do i=1, n_x_hires
+      write (0,*) x_hires(i)
+      write (1,'(*(2X, ES14.6E3))')S(i,j(1)),S(i,j(2)),S(i,j(3)),S(i,j(4)),S(i,j(5)),S(i,j(6))
+    end do
+
+    do l=1, 44
+       write (1,'(*(2X, ES14.6E3))') Theta_l(l,j(1)),Theta_l(l,j(2)),Theta_l(l,j(3)),Theta_l(l,j(4)),Theta_l(l,j(5)),Theta_l(l,j(6))
+        write (2,*) ls(l)
+    end do
+
+    do i=1,1200
+      write (3,'(*(2X, ES14.6E3))') ls_hires(i),cls_hires(i)
+    end do
+    
+    write(*,*) "closing files "
+    do i=0, 4
+      close(i)
+    end do
+
+  end subroutine write_to_file_cl_mod
 end module cl_mod
