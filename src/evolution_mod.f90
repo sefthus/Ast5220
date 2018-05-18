@@ -48,7 +48,7 @@ contains
   subroutine get_hires_source_function(k, x, S)
     implicit none
     real(dp), allocatable, dimension(:),   intent(out) :: k, x
-    real(dp), pointer, dimension(:,:), intent(out) :: S
+    real(dp), allocatable, dimension(:,:), intent(out) :: S
 
     integer(i4b) :: i, j
     real(dp)     :: g, dg, ddg, tau, dt, ddt, H_p, dH_p, ddHH_p, Pi, dPi, ddPi, ck, x_0
@@ -63,14 +63,15 @@ contains
     allocate(S_coeff(4,4,n_t,n_k))
     allocate(x(n_x_hires))
     allocate(k(n_k_hires))
+    allocate(S(n_x_hires,n_k_hires))
     write(*,*) '    making x and k grids'
     ! Make grids
     x_0 = 0.d0
     do i=1, n_x_hires
-      x(i) = x_init + (x_0 -x_init)*(i-1.d0)/(n_x_hires-1.d0)
+      x(i) = x_init + (x_0 - x_init)*(i-1.d0)/(n_x_hires-1.d0)
       k(i) = k_min  + (k_max-k_min)*(i-1.d0)/(n_k_hires-1.d0) ! not square
     end do
-    
+
     ! Substeps:
     !   1) First compute the source function over the existing k and x
     !      grids
