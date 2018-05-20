@@ -51,7 +51,7 @@ contains
     real(dp), allocatable, dimension(:,:), intent(out) :: S
 
     integer(i4b) :: i, j
-    real(dp)     :: g, dg, ddg, tau, dt, ddt, H_p, dH_p, ddHH_p, Pi, dPi, ddPi, ck, x_0
+    real(dp)     :: g, dg, ddg, tau, dt, ddt, H_p, dH_p, ddHH_p, Pi, dPi, ddPi, ck, x_0,ckH_p
     real(dp), allocatable, dimension(:,:) :: S_lores
     real(dp), allocatable, dimension(:,:,:,:) :: S_coeff
 
@@ -93,15 +93,17 @@ contains
             dPi  = dTheta(i,2,j)
 
             ddPi = 2.d0/5.d0*ckH_p*(-dH_p/H_p*Theta(i,1,j) + dTheta(i,1,j)) &
-                  + 0.3d0*(ddt*Pi + dt*dPi)&
-                  - 3.d0/5.d0*ckH_p*(-dH_p/H_p*(Theta(i,3,j))+dTheta(i,3,j))
+                  !+ 0.3d0*(ddt*Pi + dt*dPi)&
+                  - 3.d0/5.d0*ckH_p*(-dH_p/H_p*Theta(i,3,j)+dTheta(i,3,j))
+
+            ddHH_p= H_0**2/2.d0*((Omega_b+Omega_m)/a_t(i) &
+                           + 4.d0*Omega_r/a_t(i)**2 + 4.d0*Omega_lambda*a_t(i)**2)
 
             S_lores(i,j) = g*(Theta(i,0,j) + Psi(i,j) + 0.25d0*Pi)&
-                           + exp(-tau)*(dPsi(i,j) + dPhi(i,j)) &
-                           - 1.d0/ck*(g*v_b(i,j)*dH_p + H_p*(v_b(i,j)*dg + g*dv_b(i,j)))&
-                           + 0.75d0/ck**2*(g*Pi*H_0**2/2.d0*((Omega_b+Omega_m)/a_t(i) &
-                           + 4.d0*Omega_r/a_t(i)**2 + 4.d0*Omega_lambda*a_t(i)**2) &
-                           + 3.d0*H_p*dH_p*(Pi*dg + dPi*g) + H_p**2*(ddg*Pi + 2.d0*dg*dPi + g*ddPi))
+                           + exp(-tau)*(dPsi(i,j) - dPhi(i,j)) &
+                           - 1.d0/ck*(dH_p*g*v_b(i,j) + H_p*(dg*v_b(i,j) + g*dv_b(i,j)))&
+                           + 0.75d0/ck**2*(ddHH_p*g*Pi &
+                           + 3.d0*H_p*dH_p*(dg*Pi + g*dPi) + H_p**2*(ddg*Pi + 2.d0*dg*dPi + g*ddPi))
         end do
 
     end do
@@ -115,7 +117,7 @@ contains
     write(*,*) '    resample source function over high res grid'
     do i=1, n_x_hires
       do j=1, n_k_hires
-        S(i,j) = splin2_full_precomp(x_t, ks, S_coeff, x(i), k(j))
+        S(j,i) = splin2_full_precomp(x_t, ks, S_coeff, x(i), k(j))
       end do
     end do
 
@@ -255,7 +257,7 @@ contains
           do l=3,lmax_int-1
              dTheta(i_tc,l,k) = l/(2.d0*l+1.d0)*ckH_p*dTheta(i_tc,l-1,k) - (l+1.d0)/(2.d0*l+1.d0)*ckH_p*dTheta(i_tc,l+1,k) + dt*Theta(i_tc,l,k)
            end do
-          dPsi(i_tc,k)     = -dPhi(i_tc,k) - 12.d0*(H_0/(ck*a_t(i_tc)))**2.d0 *Omega_r*(-2.d0*Theta(i_tc,2,k)+dTheta(i_tc,2,k))
+          dPsi(i_tc,k)     = -dPhi(i_tc,k) - 12.d0*H_0**2.d0/(ck*a_t(i_tc))**2.d0 *Omega_r*(-2.d0*Theta(i_tc,2,k)+dTheta(i_tc,2,k))
 
           i_tc = i_tc+1
        end do ! end while do
@@ -295,7 +297,7 @@ contains
           do l=0, lmax_int
             dTheta(i,l,k) = dydx(6+l) 
           end do
-          dPsi(i,k)     = -dPhi(i,k) - 12.d0*(H_0/(ck*a_t(i)))**2 * Omega_r*(dTheta(i,2,k)-2.d0*Theta(i,2,k))
+          dPsi(i,k)     = -dPhi(i,k) - 12.d0*H_0**2.d0/(ck*a_t(i))**2.d0 * Omega_r*(-2.d0*Theta(i,2,k)+dTheta(i,2,k))
        end do
 
     end do
