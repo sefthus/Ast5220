@@ -93,7 +93,7 @@ contains
             dPi  = dTheta(i,2,j)
 
             ddPi = 2.d0/5.d0*ckH_p*(-dH_p/H_p*Theta(i,1,j) + dTheta(i,1,j)) &
-                  !+ 0.3d0*(ddt*Pi + dt*dPi)&
+                  + 0.3d0*(ddt*Pi + dt*dPi)&
                   - 3.d0/5.d0*ckH_p*(-dH_p/H_p*Theta(i,3,j)+dTheta(i,3,j))
 
             ddHH_p= H_0**2/2.d0*((Omega_b+Omega_m)/a_t(i) &
@@ -243,7 +243,7 @@ contains
           do l = 3, lmax_int
              Theta(i_tc,l,k) = - l/(2.d0*l + 1.d0)*ckH_p/dt *Theta(i_tc,l-1,k)
           end do
-          Psi(i_tc,k)        = - Phi(i_tc,k) - 12.d0*(H_0/(ck*a_t(i_tc)))**2.d0*Omega_r*Theta(i_tc,2,k)
+          Psi(i_tc,k)        = - Phi(i_tc,k) - 12.d0*(H_0/ck)**2.d0/exp(x_t(i))*Omega_r*Theta(i_tc,2,k)
           
 
           ! The store derivatives necessary here?
@@ -257,7 +257,7 @@ contains
           do l=3,lmax_int-1
              dTheta(i_tc,l,k) = l/(2.d0*l+1.d0)*ckH_p*dTheta(i_tc,l-1,k) - (l+1.d0)/(2.d0*l+1.d0)*ckH_p*dTheta(i_tc,l+1,k) + dt*Theta(i_tc,l,k)
            end do
-          dPsi(i_tc,k)     = -dPhi(i_tc,k) - 12.d0*H_0**2.d0/(ck*a_t(i_tc))**2.d0 *Omega_r*(-2.d0*Theta(i_tc,2,k)+dTheta(i_tc,2,k))
+          dPsi(i_tc,k)     = -dPhi(i_tc,k) - 12.d0*(H_0/ck)**2.d0/exp(x_t(i)) *Omega_r*(-2.d0*Theta(i_tc,2,k)+dTheta(i_tc,2,k))
 
           i_tc = i_tc+1
        end do ! end while do
@@ -288,7 +288,7 @@ contains
              Theta(i,l,k) = y(6+l)
           end do
 
-          Psi(i,k)     = - Phi(i,k) - 12.d0*(H_0/(ck*a_t(i)))**2.d0*Omega_r*Theta(i,2,k)
+          Psi(i,k)     = - Phi(i,k) - 12.d0*(H_0/ck)**2.d0/exp(x_t(i))*Omega_r*Theta(i,2,k)
 
           ! Task: Store derivatives that are required for C_l estimation
           call dy_dx(x_t(i), y, dydx)
@@ -297,7 +297,7 @@ contains
           do l=0, lmax_int
             dTheta(i,l,k) = dydx(6+l) 
           end do
-          dPsi(i,k)     = -dPhi(i,k) - 12.d0*H_0**2.d0/(ck*a_t(i))**2.d0 * Omega_r*(-2.d0*Theta(i,2,k)+dTheta(i,2,k))
+          dPsi(i,k)     = -dPhi(i,k) - 12.d0*(H_0/ck)**2.d0/exp(x_t(i)) * Omega_r*(-2.d0*Theta(i,2,k)+dTheta(i,2,k))
        end do
 
     end do

@@ -42,6 +42,7 @@ plt.rc('text',usetex=True)
 plt.rc('font',**{'family':'serif','size':16})
 
 #-------------- plot integrands
+'''
 Sj  = np.loadtxt('Sj_l.dat', unpack=True)
 bessel= np.loadtxt('besseltest.dat', unpack=True)
 bessel2= np.loadtxt('besseltest2.dat', unpack=True)
@@ -56,7 +57,7 @@ plt.ylabel(r'$\tilde S(k,x)j_l[\eta_0-\eta]/10^{-3}$')
 plt.xlabel(r'$x$')
 plt.tight_layout()
 plt.show()
-sys.exit()
+#sys.exit()
 n_s = 0.96
 # l=100
 plt.figure()
@@ -66,20 +67,21 @@ plt.ylabel(r'$\Theta_l^2_l(k)H_0/ck$')
 plt.xlabel(r'$kc/H_0$')
 plt.tight_layout()
 plt.show()
-sys.exit()
+#ssys.exit()
 '''
+n_s=0.96
 plt.figure()
-[plt.plot(ls, C_l_int[i]/(c*k_hires/H_0)**(n_s-1.), label=(r'$kc/H_0=$'+"{0}".format(str(round(k_val[i], 2))))) for i in range(len(k_val))]
-plt.legend(loc='upper left')
+[plt.plot(ls, C_l_int[i]/(c*k_hires/H0)**(n_s-1.))for i in range(len(k_val))]#, label=(r'$kc/H_0=$'+"{0}".format(str(round(k_val[i], 2))))) for i in range(len(k_val))]
+#plt.legend(loc='upper left')
 plt.ylabel(r'$\Theta_l^2_l(k)H_0/ck$')
 plt.xlabel(r'$l$')
 plt.tight_layout()
 #plt.grid('on', linestyle ='--')
 plt.show()
-'''
+
 # --------------- plot Theta_l and the power spectrum C_l
 plt.figure()
-[plt.plot(ls, Theta_l[i], label=(r'$kc/H_0=$'+"{0}".format(str(round(k_val[i], 2))))) for i in range(len(k_val))]
+[plt.plot(ls, Theta_l[i])for i in range(len(k_val))]#, label=(r'$kc/H_0=$'+"{0}".format(str(round(k_val[i], 2))))) for i in range(len(k_val))]
 plt.legend(loc='lower left')
 plt.ylabel(r'$\Theta_l$')
 plt.xlabel(r'$l$')
@@ -89,8 +91,8 @@ plt.show()
 
 
 plt.figure()
-#plt.plot(l_hires, C_l[i],label='simulated')
-plt.errorbar(planck_l, C_l_planck, yerr=error, label='Planck')
+plt.plot(l_hires, C_l[i],label='simulated')
+#plt.errorbar(planck_l, C_l_planck, yerr=error, label='Planck')
 
 plt.legend(loc='upper left')
 plt.ylabel(r'$l(l+1)C_l/2\pi$')

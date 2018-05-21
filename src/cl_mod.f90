@@ -116,7 +116,7 @@ contains
     !allocate(x_lores(n_x_hires/10)) ! creating low-res x grid for fast Theta_l-integration
 
     ! Overall task: Compute the C_l's for each given l
-    do l = 17, l_num
+    do l = 1, l_num
 	write(*,*) 'l=', l
        ! Task: Compute the transfer function, Theta_l(k)
       ! start trapezoidal x
@@ -143,7 +143,7 @@ contains
                write (17 ,*) integrand1(i)
              end do 
              close (17)
-            stop
+            !stop
          end if
         call trapz(x_hires,integrand1,Theta_l(l,j))
       end do

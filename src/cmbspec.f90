@@ -6,6 +6,11 @@ program cmbspec
   use evolution_mod
   use cl_mod
   implicit none
+  !Time keeping variables
+  real(dp) :: start_time,end_time
+
+  !Start timer
+  call cpu_time(start_time)
 
   ! Initialize time grids
   write(*,*) "initializing time module"
@@ -28,5 +33,9 @@ program cmbspec
   !call write_to_file_rec_mod
   !call write_to_file_evolution_mod
   call write_to_file_cl_mod
+
+  !Print time used
+  call cpu_time(end_time)
+  print'("Time used = ",f7.2," seconds.")',end_time-start_time
 
 end program cmbspec
