@@ -482,7 +482,9 @@ contains
     open (unit=7, file = 'v_b.dat', status='replace')
     open (unit=8, file = 'Theta0.dat', status='replace')
     open (unit=9, file = 'Theta1.dat', status='replace')
-    
+    open (unit=10, file = 'dPhi.dat', status='replace')
+    open (unit=11, file = 'dPsi.dat', status='replace')
+
     do i=1,6
         write(0,*) k(i),ks(k(i))
     end do
@@ -498,11 +500,12 @@ contains
       write (7,'(*(2X, ES14.6E3))') v_b(i,k(1)),v_b(i,k(2)),v_b(i,k(3)),v_b(i,k(4)),v_b(i,k(5)),v_b(i,k(6))
       write (8,'(*(2X, ES14.6E3))') Theta(i,0,k(1)),Theta(i,0,k(2)),Theta(i,0,k(3)),Theta(i,0,k(4)),Theta(i,0,k(5)),Theta(i,0,k(6))
       write (9,'(*(2X, ES14.6E3))') Theta(i,1,k(1)),Theta(i,1,k(2)),Theta(i,1,k(3)),Theta(i,1,k(4)),Theta(i,1,k(5)),Theta(i,1,k(6))
-
+      write (10,'(*(2X, ES14.6E3))') dPhi(i,k(1)),dPhi(i,k(2)),dPhi(i,k(3)),dPhi(i,k(4)),dPhi(i,k(5)),dPhi(i,k(6))
+      write (11,'(*(2X, ES14.6E3))') dPsi(i,k(1)),dPsi(i,k(2)),dPsi(i,k(3)),dPsi(i,k(4)),dPsi(i,k(5)), dPsi(i,k(6))
     end do
     
     write(*,*) "closing files "
-    do i=0, 9
+    do i=0, 11
       close(i)
     end do
 
