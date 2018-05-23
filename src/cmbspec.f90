@@ -20,8 +20,8 @@ program cmbspec
   call initialize_rec_mod
 
   write(*,*) "initializing evolution module"
-  call initialize_perturbation_eqns
-  call integrate_perturbation_eqns
+  !call initialize_perturbation_eqns
+  !call integrate_perturbation_eqns
 
   write(*,*) " initialize cl module"
   call compute_cls
