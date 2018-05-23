@@ -60,6 +60,7 @@ contains
     allocate(j_l(n_spline, l_num))
     allocate(j_l2(n_spline, l_num))
 
+    write(*,*) 'making z_spline'
     do i=1,n_spline
       z_spline(i) = 0.d0 + (i-1)*(3400.d0-0.d0)/(n_spline-1.d0)
       !z_spline(i) = (i-1)*3400.d0/(n_spline-1.d0)
@@ -69,10 +70,6 @@ contains
     filename = 'j_l.bin'
     inquire(file=filename, exist=exist)
     if (exist) then
-       open(10, form='unformatted', file=filename)
-       read(10) j_l, j_l2
-       close(10)
-    else
       write(*,*) "compute spherical Bessel functions"
       do i=1, n_spline
         do l=1, l_num
@@ -134,23 +131,23 @@ contains
       write(*,*) 'start trapezoidal for theta_l'
       integral2 = 0.d0
       do j=1, n_k_hires
-        write(*,*) 'k=',j,'l=',l
+        !write(*,*) 'k=',j,'l=',l
         integral1= 0.d0
         do i=1, n_x_hires
           integrand1(i) = S(j,i)*splint(z_spline,j_l(:,l),j_l2(:,l), k_eta(j,i))
           integral1 = integral1 + integrand1(i)
         end do
       Theta_l(l,j) = h1*(integral1-0.5d0*(integrand1(1)+integrand1(n_x_hires)))
-        if(l==17 .and. j==j_loc) then
-          write(*,*) 'j_loc =', j_loc, 'k=',j_loc*c/H_0
-          write(*,*)'writing integrand to file for l=17,k=',j_loc
-          open (unit=17 ,file="Sj_l.dat",action="write",status="replace")
-             do i=1,n_x_hires
-               write (17 ,*) integrand1(i)
-             end do 
-             close (17)
+        !if(l==17 .and. j==j_loc) then
+        !  write(*,*) 'j_loc =', j_loc, 'k=',j_loc*c/H_0
+        !  write(*,*)'writing integrand to file for l=17,k=',j_loc
+        !  open (unit=17 ,file="Sj_l.dat",action="write",status="replace")
+        !     do i=1,n_x_hires
+        !       write (17 ,*) integrand1(i)
+        !     end do 
+        !     close (17)
             !stop
-         end if
+         !end if
         !write(*,*) 'is this stalling'
         !call trapz(x_hires,integrand1,Theta_l(l,j))
         !write(*,*) 'we will see'
@@ -159,7 +156,7 @@ contains
 
        ! Task: Integrate P(k) * (Theta_l^2 / k) over k to find un-normalized C_l's
        ! start trapezoidal k
-      write(*,*) 'start trapezoidal for cl'
+      !write(*,*) 'start trapezoidal for cl'
       !do j=1,n_k_hires
         integrand2(l,j) = (c*k_hires(j)/H_0)**(n_s-1.d0)*Theta_l(l,j)**2/k_hires(j)
         integral2 = integral2 + integrand2(l,j)
@@ -267,8 +264,8 @@ contains
     do i=1, 6
       call spline(ls_dp, Theta_l(:,j(i)), 1.d30,1.d30, Theta2_l(:,i))
       call spline(ls_dp, integrand2(:,j(i)), 1.d30,1.d30, integrand22(:,i))
-
     end do
+
     write(*,*) '    writing highres l, Theta_l, C_l_int and C_l to file'
     do i=1,1200
        write (5,'(*(2X, ES14.6E3))')& ! write highres Theta_l to file
