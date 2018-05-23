@@ -11,7 +11,6 @@ module cl_mod
   real(dp),     allocatable, dimension(:)       :: x_hires, k_hires,integrand1
   real(dp),     allocatable, dimension(:,:)     :: Theta_l
   real(dp),     allocatable, dimension(:,:)     :: integrand2
-  !real(dp),     parameter, private :: n_s=0.96
 
 contains
 
@@ -164,15 +163,15 @@ contains
         end do
         Theta_l(l,j) = h1*integral1  !-0.5d0*(integrand1(1)+integrand1(n_x_hires)))
 
-        if(l==17 .and. j==j_loc) then   ! Save l=100 and k=340 compare with Callin
-          write(*,*)'writing integrand to file for l=17,k=',j_loc
-          open (unit=2 ,file="Sj_l.dat",action="write",status="replace")
-             do i=1,n_x_hires
-               write (2 ,*) integrand1(i)
-             end do 
-             close (2)
+        !if(l==17 .and. j==j_loc .and. n_s==0.96) then   ! Save l=100 and k=340 compare with Callin
+        !  write(*,*)'writing integrand to file for l=17,k=',j_loc
+        !  open (unit=2 ,file="Sj_l.dat",action="write",status="replace")
+        !     do i=1,n_x_hires
+        !       write (2 ,*) integrand1(i)
+        !     end do 
+        !     close (2)
             !stop
-         end if
+        ! end if
 
        ! Task: Integrate P(k) * (Theta_l^2 / k) over k to find un-normalized C_l's
         integrand2(l,j) = (c*k_hires(j)/H_0)**(n_s-1.d0)*Theta_l(l,j)**2/k_hires(j)
@@ -237,43 +236,43 @@ contains
     end do
     write(*,*) "writing to file; cl_mod"   
  
-!---------- write to file ---
+!-------------- write to file ---------------
     write(*,*) "opening files "
-    open (unit=1, file = 'l_val.dat', status='replace')
-    open (unit=2, file = 'x_k_hires.dat', status='replace')
-    open (unit=3, file = 'Theta_l.dat', status='replace')
-    open (unit=4, file = 'C_l_integrand.dat', status='replace')
-    open (unit=5, file = 'C_l.dat', status='replace')
+    !open (unit=1, file = 'l_val_ns099.dat', status='replace')
+    !open (unit=2, file = 'x_k_hires_ns099.dat', status='replace')
+    !open (unit=3, file = 'Theta_l_ns099.dat', status='replace')
+    !open (unit=4, file = 'C_l_integrand_ns099.dat', status='replace')
+    open (unit=5, file = 'C_l_ns099.dat', status='replace')
 
     write(*,*) "writing stuff"
     write(*,*) '    writing chosen k values'
-    do i=1, 6 ! write the k values used
-      write(1, *) l_val(i)      
-    end do
+    !do i=1, 6 ! write the k values used
+    !  write(1, *) l_val(i)      
+    !end do
 
-    write(*,*) '    writing x, k, source func., Theta_intl100, C_l100_int,Theta_l, C_l_int'
-    do i=1, n_x_hires
-      write (2,'(*(2X, ES14.6E3))') x_hires(i), k_hires(i)
-      write (3,'(*(2X, ES14.6E3))')&
-        Theta_l(l(1), i),Theta_l(l(2), i),Theta_l(l(3), i),Theta_l(l(4),i ),Theta_l(l(5), i),Theta_l(l(6), i)
-      write (4,'(*(2X, ES14.6E3))')&
-        integrand2(l(1), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-        integrand2(l(2), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-        integrand2(l(3), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-        integrand2(l(4), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-        integrand2(l(5), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-        integrand2(l(6), i)/(c*k_hires(i)/H_0)**(n_s-1.d0)
-    end do
+    !write(*,*) '    writing x, k, source func., Theta_intl100, C_l100_int,Theta_l, C_l_int'
+    !do i=1, n_x_hires
+    !  write (2,'(*(2X, ES14.6E3))') x_hires(i), k_hires(i)
+    !  write (3,'(*(2X, ES14.6E3))')&
+    !    Theta_l(l(1), i),Theta_l(l(2), i),Theta_l(l(3), i),Theta_l(l(4),i ),Theta_l(l(5), i),Theta_l(l(6), i)
+    !  write (4,'(*(2X, ES14.6E3))')&
+    !    integrand2(l(1), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+    !    integrand2(l(2), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+    !    integrand2(l(3), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+    !    integrand2(l(4), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+    !    integrand2(l(5), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+    !    integrand2(l(6), i)/(c*k_hires(i)/H_0)**(n_s-1.d0)
+    !end do
 
     write(*,*) '    writing l_hires and c_l_hires'
     do i=1,1200
       write (5,'(*(2X, ES14.6E3))') ls_hires(i), cls_hires(i)
     end do
-    
-    write(*,*) 'closing files'
-    do i=1, 5
-      close(i)
-    end do
+    close(5)
+    !write(*,*) 'closing files'
+    !do i=1, 5
+    !  close(i)
+    !end do
 
   end subroutine write_to_file_cl_mod
 end module cl_mod

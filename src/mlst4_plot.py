@@ -39,7 +39,7 @@ plt.rc('text',usetex=True)
 plt.rc('font',**{'family':'serif','size':16})
 
 #-------------- plot integrands
-
+'''
 Sj  = np.loadtxt('Sj_l.dat', unpack=True)
 bessel= np.loadtxt('besseltest.dat', unpack=True)
 bessel2= np.loadtxt('besseltest2.dat', unpack=True)
@@ -82,6 +82,50 @@ normal = 5775./np.max(C_l)
 plt.figure()
 plt.errorbar(planck_l, C_l_planck, yerr=error, label='Planck')
 plt.plot(l_hires, C_l*normal, label='simulated')
+plt.legend(loc='upper left')
+plt.ylabel(r'$l(l+1)C_l/2\pi$')
+plt.xlabel(r'$l$')
+plt.tight_layout()
+plt.show()
+'''
+#------------------------- parameter estimation ---------------------
+C_l_h66           = np.loadtxt('C_l_h66.dat',usecols=(1), unpack=True)
+C_l_h74            = np.loadtxt('C_l_h74.dat',usecols=(1), unpack=True)
+C_l_n099           = np.loadtxt('C_l_ns099.dat',usecols=(1), unpack=True)
+C_l_n092            = np.loadtxt('C_l_ns092.dat',usecols=(1), unpack=True)
+
+C_l_b042            = np.loadtxt('C_l_om_b042.dat',usecols=(1), unpack=True)
+C_l_b048            = np.loadtxt('C_l_om_b048.dat',usecols=(1), unpack=True)
+C_l_m220            = np.loadtxt('C_l_om_m220.dat',usecols=(1), unpack=True)
+C_l_m228            = np.loadtxt('C_l_om_m228.dat',usecols=(1), unpack=True)
+C_l_r83d4            = np.loadtxt('C_l_om_r83d4.dat',usecols=(1), unpack=True)
+C_l_r43d5            = np.loadtxt('C_l_om_r43d5.dat',usecols=(1), unpack=True)
+
+C_l_m = np.array([C_l_m220,C_l_m228])
+C_l_r = np.array([C_l_r83d4,C_l_r43d5])
+C_l_b = np.array([C_l_b042,C_l_b048])
+C_l_h = np.array([C_l_h66,C_l_h74])
+C_l_n = np.array([C_l_n092,C_l_n099])
+
+param = 0 
+plt.figure()
+plt.errorbar(planck_l, C_l_planck, yerr=error, label=r'Planck')
+if param=0:
+    plt.plot(l_hires, C_l_m[0]*5775./np.max(C_l_m[0]), label=(r'\Omega_m=0.220'))
+    plt.plot(l_hires, C_l_m[1]*5775./np.max(C_l_m[1]), label=(r'\Omega_m=0.228'))
+if param=1:
+    plt.plot(l_hires, C_l_r[0]*5775./np.max(C_l_r[0]), label=(r'\Omega_r=4.3\cdot 10{-5}'))
+    plt.plot(l_hires, C_l_r[1]*5775./np.max(C_l_r[1]), label=(r'\Omega_r=8.3\cdot 10{-4}'))
+if param = 2:
+    plt.plot(l_hires, C_l_b[0]*5775./np.max(C_l_b[0]), label=(r'\Omega_b=0.042'))
+    plt.plot(l_hires, C_l_b[1]*5775./np.max(C_l_b[1]), label=(r'\Omega_b=0.048'))
+if param = 3:
+    plt.plot(l_hires, C_l_h[0]*5775./np.max(C_l_h[0]), label=(r'h=66'))
+    plt.plot(l_hires, C_l_h[1]*5775./np.max(C_l_h[1]), label=(r'h=74'))
+if param = 4:
+    plt.plot(l_hires, C_l_n[0]*5775./np.max(C_l_n[0]), label=(r'n=0.92'))
+    plt.plot(l_hires, C_l_n[1]*5775./np.max(C_l_n[1]), label=(r'h=0.99'))
+
 plt.legend(loc='upper left')
 plt.ylabel(r'$l(l+1)C_l/2\pi$')
 plt.xlabel(r'$l$')
