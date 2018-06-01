@@ -10,27 +10,29 @@ module params
   real(dp), parameter :: Mpc = 3.08568025d22
 
   ! Cosmological parameters
-!  real(dp), parameter :: Omega_b      = 0.046d0
-!  real(dp), parameter :: Omega_m      = 0.224d0
-!  real(dp), parameter :: Omega_r      = 8.3d-5
-! Best fit parameters
-  real(dp), parameter :: Omega_b      = 0.07d0
-  real(dp), parameter :: Omega_m      = 0.200d0
-  real(dp), parameter :: Omega_r      = 2.d-4
-!  real(dp), parameter :: Omega_r      = 1.3d-4
+  real(dp), parameter :: Omega_b      = 0.046d0
+  real(dp), parameter :: Omega_m      = 0.224d0
+  real(dp), parameter :: Omega_r      = 8.3d-5
 
+
+!----------------- Best fit parameters ---------
+!  real(dp), parameter :: Omega_b      = 0.063d0
+!  real(dp), parameter :: Omega_m      = 0.200d0
+!  real(dp), parameter :: Omega_r      = 8.22d-5
+!  real(dp), parameter :: h0           = 0.65d0
+!  real(dp), parameter :: n_s          = 0.8d0
+!----------------------------------------------
   real(dp), parameter :: Omega_nu     = 0.d0
   ! If you want neutrinos, use the two below
 !  real(dp), parameter :: Omega_r      = 5.04d-5
 !  real(dp), parameter :: Omega_nu     = 8.3d-5 - Omega_r
   real(dp), parameter :: Omega_lambda = 1.d0 - Omega_m - Omega_b - Omega_r - Omega_nu
   real(dp), parameter :: T_0          = 2.725d0
-!  real(dp), parameter :: n_s          = 0.96d0
-  real(dp), parameter :: n_s          = 0.85d0
+  real(dp), parameter :: n_s          = 0.96d0
 
   real(dp), parameter :: A_s          = 1.d0
-!  real(dp), parameter :: h0           = 0.7d0
-  real(dp), parameter :: h0           = 0.65d0
+  real(dp), parameter :: h0           = 0.7d0
+
   real(dp), parameter :: H_0          = h0 * 100.d0 * 1.d3 / Mpc
 
   ! General constants

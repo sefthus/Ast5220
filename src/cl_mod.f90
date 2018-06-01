@@ -5,10 +5,10 @@ module cl_mod
   use spline_1D_mod
   implicit none
 
-  real(dp),     allocatable, dimension(:,:)     :: S, S2
+  real(dp),     allocatable, dimension(:,:)     :: S
   integer(i4b), allocatable, dimension(:)       :: ls
   real(dp),     allocatable, dimension(:)       :: ls_dp, ls_hires, cls_hires
-  real(dp),     allocatable, dimension(:)       :: x_hires, k_hires,integrand1
+  real(dp),     allocatable, dimension(:)       :: x_hires, k_hires, integrand1
   real(dp),     allocatable, dimension(:,:)     :: Theta_l
   real(dp),     allocatable, dimension(:,:)     :: integrand2
 
@@ -18,19 +18,18 @@ contains
   subroutine compute_cls
     implicit none
 
-    integer(i4b) :: i, j, l, l_num, x_num, n_spline, j_loc
-    real(dp)     :: dx, S_func, j_func, z, eta, eta0, x0, x_min, x_max, d, e
+    integer(i4b) :: i, j, l, l_num, n_spline, j_loc
 
     real(dp),     allocatable,     dimension(:,:)     :: j_l, j_l2
-    real(dp),     allocatable,     dimension(:)       :: x_arg, int_arg, cls, cls2
+    real(dp),     allocatable,     dimension(:)       :: cls, cls2
     real(dp),     allocatable,     dimension(:)       :: k, x
     real(dp),     allocatable,     dimension(:,:,:,:) :: S_coeff
 
     real(dp),     allocatable, dimension(:)       :: z_spline, j_l_spline, j_l_spline2
-    real(dp),     allocatable, dimension(:)       :: x_lores, besseltest
+    real(dp),     allocatable, dimension(:)       :: besseltest
     real(dp),     allocatable, dimension(:)       :: eta_arr
 
-    real(dp)           :: t1, t2, integral, integral1, integral2, h1, h2, int1
+    real(dp)           :: integral1, integral2, h1, h2, eta0
 
     logical(lgt)       :: exist
     character(len=128) :: filename1,filename
@@ -43,14 +42,13 @@ contains
     ls = (/ 2, 3, 4, 6, 8, 10, 12, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, &
          & 120, 140, 160, 180, 200, 225, 250, 275, 300, 350, 400, 450, 500, 550, &
          & 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1050, 1100, 1150, 1200 /)
-    !ls = (/6,100, 200,500,1000,1200/)
 
     ! Task: Get source function from evolution_mod
     allocate(S(n_k_hires,n_x_hires))
     allocate(x_hires(n_x_hires))
     allocate(k_hires(n_k_hires))
 
-    filename1 = 'source_bf6.bin'
+    filename1 = 'source.bin'
     inquire(file=filename1, exist=exist)
     if (exist) then
        write(*,*) 'reading Source function from file'
@@ -125,7 +123,6 @@ contains
     !stop
 
     allocate(Theta_l(l_num,n_k_hires))
-    allocate(int_arg(n_x_hires))
     allocate(integrand1(n_x_hires))
     allocate(integrand2(l_num, n_k_hires))
     allocate(cls(l_num))
@@ -158,20 +155,19 @@ contains
         integral1= 0.d0              ! Reset Theta integration
         do i=1, n_x_hires
           integrand1(i) = S(j,i)*splint(z_spline,j_l(:,l),j_l2(:,l), k_hires(j)*eta_arr(i))
-          !int1 = S(j,i)*splint(z_spline,j_l(:,l),j_l2(:,l), k_hires(j)*k_eta(i))
-          integral1 = integral1 + integrand1(i) !int1
+          integral1 = integral1 + integrand1(i)
         end do
         Theta_l(l,j) = h1*integral1  !-0.5d0*(integrand1(1)+integrand1(n_x_hires)))
 
-        !if(l==17 .and. j==j_loc .and. n_s==0.96) then   ! Save l=100 and k=340 compare with Callin
-        !  write(*,*)'writing integrand to file for l=17,k=',j_loc
-        !  open (unit=2 ,file="Sj_l.dat",action="write",status="replace")
-        !     do i=1,n_x_hires
-        !       write (2 ,*) integrand1(i)
-        !     end do 
-        !     close (2)
+        if(l==17 .and. j==j_loc .and. n_s==0.96) then   ! Save l=100 and k=340 compare with Callin
+          write(*,*)'writing integrand to file for l=17,k=',j_loc
+          open (unit=2 ,file="Sj_l.dat",action="write",status="replace")
+             do i=1,n_x_hires
+               write (2 ,*) integrand1(i)
+             end do 
+             close (2)
             !stop
-        ! end if
+         end if
 
        ! Task: Integrate P(k) * (Theta_l^2 / k) over k to find un-normalized C_l's
         integrand2(l,j) = (c*k_hires(j)/H_0)**(n_s-1.d0)*Theta_l(l,j)**2/k_hires(j)
@@ -226,8 +222,6 @@ contains
     integer(i4b), dimension(6) :: l_val,l
     integer(i4b), dimension(44) :: ll
 
-    !l_val(1:6)=(/6, 100, 200, 500, 900, 1200 /) ! k
-    !!l=(/4,17,22,30,38,44/)
     ! Finds index of chosen l values
     l_val(1:6)=(/6, 100, 200, 500, 1000, 1200/)
     do j=1, 6 
@@ -238,41 +232,41 @@ contains
  
 !-------------- write to file ---------------
     write(*,*) "opening files "
-    !open (unit=1, file = 'l_val_ns099.dat', status='replace')
-    !open (unit=2, file = 'x_k_hires_ns099.dat', status='replace')
-    !open (unit=3, file = 'Theta_l_ns099.dat', status='replace')
-    !open (unit=4, file = 'C_l_integrand_ns099.dat', status='replace')
-    open (unit=5, file = 'C_l_bf6.dat', status='replace')
+    open (unit=1, file = 'l_val_ns099.dat', status='replace')
+    open (unit=2, file = 'x_k_hires_ns099.dat', status='replace')
+    open (unit=3, file = 'Theta_l_ns099.dat', status='replace')
+    open (unit=4, file = 'C_l_integrand_ns099.dat', status='replace')
+    open (unit=5, file = 'C_l.dat', status='replace')
 
     write(*,*) "writing stuff"
     write(*,*) '    writing chosen k values'
-    !do i=1, 6 ! write the k values used
-    !  write(1, *) l_val(i)      
-    !end do
+    do i=1, 6 ! write the k values used
+      write(1, *) l_val(i)      
+    end do
 
-    !write(*,*) '    writing x, k, source func., Theta_intl100, C_l100_int,Theta_l, C_l_int'
-    !do i=1, n_x_hires
-    !  write (2,'(*(2X, ES14.6E3))') x_hires(i), k_hires(i)
-    !  write (3,'(*(2X, ES14.6E3))')&
-    !    Theta_l(l(1), i),Theta_l(l(2), i),Theta_l(l(3), i),Theta_l(l(4),i ),Theta_l(l(5), i),Theta_l(l(6), i)
-    !  write (4,'(*(2X, ES14.6E3))')&
-    !    integrand2(l(1), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-    !    integrand2(l(2), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-    !    integrand2(l(3), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-    !    integrand2(l(4), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-    !    integrand2(l(5), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-    !    integrand2(l(6), i)/(c*k_hires(i)/H_0)**(n_s-1.d0)
-    !end do
+    write(*,*) '    writing x, k, source func., Theta_intl100, C_l100_int,Theta_l, C_l_int'
+    do i=1, n_x_hires
+      write (2,'(*(2X, ES14.6E3))') x_hires(i), k_hires(i)
+      write (3,'(*(2X, ES14.6E3))')&
+        Theta_l(l(1), i),Theta_l(l(2), i),Theta_l(l(3), i),Theta_l(l(4),i ),Theta_l(l(5), i),Theta_l(l(6), i)
+      write (4,'(*(2X, ES14.6E3))')&
+        integrand2(l(1), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+        integrand2(l(2), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+        integrand2(l(3), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+        integrand2(l(4), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+        integrand2(l(5), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+        integrand2(l(6), i)/(c*k_hires(i)/H_0)**(n_s-1.d0)
+    end do
 
     write(*,*) '    writing l_hires and c_l_hires'
     do i=1,1200
       write (5,'(*(2X, ES14.6E3))') ls_hires(i), cls_hires(i)
     end do
-    close(5)
-    !write(*,*) 'closing files'
-    !do i=1, 5
-    !  close(i)
-    !end do
+    
+    write(*,*) 'closing files'
+    do i=1, 5
+      close(i)
+    end do
 
   end subroutine write_to_file_cl_mod
 end module cl_mod
