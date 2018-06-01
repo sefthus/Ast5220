@@ -89,34 +89,35 @@ C_l_h74            = np.loadtxt('C_l_h74.dat',usecols=[1], unpack=True)
 C_l_n099           = np.loadtxt('C_l_ns099.dat',usecols=[1], unpack=True)
 C_l_n092            = np.loadtxt('C_l_ns092.dat',usecols=[1], unpack=True)
 
-C_l_b042            = np.loadtxt('C_l_om_b042.dat',usecols=[1], unpack=True)
-C_l_b048            = np.loadtxt('C_l_om_b048.dat',usecols=[1], unpack=True)
-C_l_m220            = np.loadtxt('C_l_om_m220.dat',usecols=[1], unpack=True)
-C_l_m228            = np.loadtxt('C_l_om_m228.dat',usecols=[1], unpack=True)
+C_l_b030            = np.loadtxt('C_l_om_b030.dat',usecols=[1], unpack=True)
+C_l_b060            = np.loadtxt('C_l_om_b060.dat',usecols=[1], unpack=True)
+C_l_m150            = np.loadtxt('C_l_om_m150.dat',usecols=[1], unpack=True)
+C_l_m300            = np.loadtxt('C_l_om_m300.dat',usecols=[1], unpack=True)
 C_l_r83d4            = np.loadtxt('C_l_om_r83d4.dat',usecols=[1], unpack=True)
 C_l_r43d5            = np.loadtxt('C_l_om_r43d5.dat',usecols=[1], unpack=True)
 
-C_l_m = np.array([C_l_m220,C_l_m228])
 C_l_r = np.array([C_l_r83d4,C_l_r43d5])
-C_l_b = np.array([C_l_b042,C_l_b048])
+C_l_m = np.array([C_l_m150,C_l_m300])
+C_l_b = np.array([C_l_b030,C_l_b060])
 C_l_h = np.array([C_l_h66,C_l_h74])
 C_l_n = np.array([C_l_n092,C_l_n099])
 
-param = 3
+param = 4
 plt.figure()
 plt.errorbar(planck_l, C_l_planck, yerr=error, label=r'Planck', zorder=0, elinewidth=1,capsize=1)
-plt.plot(l_hires, C_l*5775/np.max(C_l), label='standard')
+plt.plot(l_hires, C_l*5775/np.max(C_l), label='default')
 if param == 0: # rerun, increase Omega_m, increases the spectrum, bearly, after first peak, look similiar to h
-    plt.plot(l_hires, C_l_m[0]*5775./np.max(C_l_m[0]), label=(r'\Omega_m=0.220'))
-    plt.plot(l_hires, C_l_m[1]*5775./np.max(C_l_m[1]), label=(r'\Omega_m=0.228'))
+    plt.plot(l_hires, C_l_m[0]*5775./np.max(C_l_m[0]), label=(r'\Omega_m=0.150'))
+    plt.plot(l_hires, C_l_m[1]*5775./np.max(C_l_m[1]), label=(r'\Omega_m=0.300'))
+
 if param == 1: 
     plt.plot(l_hires, C_l_r[0]*5775./np.max(C_l_r[0]), label=(r'\Omega_r=4.3\cdot 10^{-5}'))
     plt.plot(l_hires, C_l_r[1]*5775./np.max(C_l_r[1]), label=(r'\Omega_r=8.3\cdot 10^{-4}'))
 # might want to increse Omega_r a little, shifts the spectrum to the left
 #lowers the first and third dip, second peak and fourth peak, lower it so much gives a crazy spectrum
-if param == 2: # rerun, increase Omega_b, lowers second peak
-    plt.plot(l_hires, C_l_b[0]*5775./np.max(C_l_b[0]), label=(r'\Omega_b=0.042'))
-    plt.plot(l_hires, C_l_b[1]*5775./np.max(C_l_b[1]), label=(r'\Omega_b=0.048'))
+if param == 2: # rerun, increase Omega_b, lowers second peak. EDIT: might want to lower it further
+    plt.plot(l_hires, C_l_b[0]*5775./np.max(C_l_b[0]), label=(r'\Omega_b=0.030'))
+    plt.plot(l_hires, C_l_b[1]*5775./np.max(C_l_b[1]), label=(r'\Omega_b=0.060'))
 if param == 3: # increase h, increase the spectrum bearly, after first peak, mainly third peak
     plt.plot(l_hires, C_l_h[0]*5775./np.max(C_l_h[0]), label=(r'h=66'))
     plt.plot(l_hires, C_l_h[1]*5775./np.max(C_l_h[1]), label=(r'h=74'))
@@ -127,6 +128,7 @@ if param == 4: # lower n, lower the spectrum beyond the first peak visibly
 plt.legend(loc='upper right')
 plt.ylabel(r'$l(l+1)C_l/2\pi$')
 plt.xlabel(r'$l$')
+plt.xlim(0,1200)
 plt.tight_layout()
 plt.show()
 
