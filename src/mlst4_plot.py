@@ -96,13 +96,19 @@ C_l_m300            = np.loadtxt('C_l_om_m300.dat',usecols=[1], unpack=True)
 C_l_r83d4            = np.loadtxt('C_l_om_r83d4.dat',usecols=[1], unpack=True)
 C_l_r43d5            = np.loadtxt('C_l_om_r43d5.dat',usecols=[1], unpack=True)
 
+C_l_bf2            = np.loadtxt('C_l_bf2.dat',usecols=[1], unpack=True)
+C_l_bf3            = np.loadtxt('C_l_bf3.dat',usecols=[1], unpack=True)
+C_l_bf4            = np.loadtxt('C_l_bf4.dat',usecols=[1], unpack=True)
+C_l_bf5            = np.loadtxt('C_l_bf5.dat',usecols=[1], unpack=True)
+
+C_l_bf = np.array([C_l_bf2, C_l_bf3, C_l_bf4, C_l_bf5])
 C_l_r = np.array([C_l_r83d4,C_l_r43d5])
 C_l_m = np.array([C_l_m150,C_l_m300])
 C_l_b = np.array([C_l_b030,C_l_b060])
 C_l_h = np.array([C_l_h66,C_l_h74])
 C_l_n = np.array([C_l_n092,C_l_n099])
 
-param = 4
+param = 5
 plt.figure()
 plt.errorbar(planck_l, C_l_planck, yerr=error, label=r'Planck', zorder=0, elinewidth=1,capsize=1)
 plt.plot(l_hires, C_l*5775/np.max(C_l), label='default')
@@ -124,7 +130,12 @@ if param == 3: # increase h, increase the spectrum bearly, after first peak, mai
 if param == 4: # lower n, lower the spectrum beyond the first peak visibly
     plt.plot(l_hires, C_l_n[0]*5775./np.max(C_l_n[0]), label=(r'n=0.92'))
     plt.plot(l_hires, C_l_n[1]*5775./np.max(C_l_n[1]), label=(r'n=0.99'))
-
+if param == 5:
+    lab_str = [2,3,4,5]
+    [plt.plot(l_hires,C_l_bf[0]*5775./np.max(C_l_bf[0]), label=(r'Best fit'+str(lab_str[i]))) for i in range(len(C_l_bf)-1)]
+    #plt.plot(l_hires,C_l_bf[0]*5775./np.max(C_l_bf[0]), label=(r'Best fit'))
+    #plt.plot(l_hires,C_l_bf[1]*5775./np.max(C_l_bf[1]), label=(r'Best fit'))
+    #plt.plot(l_hires,C_l_bf[2]*5775./np.max(C_l_bf[2]), label=(r'Best fit'))
 plt.legend(loc='upper right')
 plt.ylabel(r'$l(l+1)C_l/2\pi$')
 plt.xlabel(r'$l$')

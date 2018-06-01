@@ -50,7 +50,7 @@ contains
     allocate(x_hires(n_x_hires))
     allocate(k_hires(n_k_hires))
 
-    filename1 = 'source_om_b030.bin'
+    filename1 = 'source_bf6.bin'
     inquire(file=filename1, exist=exist)
     if (exist) then
        write(*,*) 'reading Source function from file'
@@ -242,7 +242,7 @@ contains
     !open (unit=2, file = 'x_k_hires_ns099.dat', status='replace')
     !open (unit=3, file = 'Theta_l_ns099.dat', status='replace')
     !open (unit=4, file = 'C_l_integrand_ns099.dat', status='replace')
-    open (unit=5, file = 'C_l_om_b030.dat', status='replace')
+    open (unit=5, file = 'C_l_bf6.dat', status='replace')
 
     write(*,*) "writing stuff"
     write(*,*) '    writing chosen k values'
