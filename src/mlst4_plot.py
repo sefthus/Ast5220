@@ -87,19 +87,19 @@ plt.xlim(0, 1200)
 plt.show()
 '''
 #------------------------- parameter estimation ---------------------
-C_l_h66           = np.loadtxt('C_l_h66.dat',usecols=[1], unpack=True)
-C_l_h74            = np.loadtxt('C_l_h74.dat',usecols=[1], unpack=True)
-C_l_n099           = np.loadtxt('C_l_ns099.dat',usecols=[1], unpack=True)
-C_l_n092            = np.loadtxt('C_l_ns092.dat',usecols=[1], unpack=True)
+C_l_h66          = np.loadtxt('C_l_h66.dat',usecols=[1], unpack=True)
+C_l_h74          = np.loadtxt('C_l_h74.dat',usecols=[1], unpack=True)
+C_l_n099         = np.loadtxt('C_l_ns099.dat',usecols=[1], unpack=True)
+C_l_n092         = np.loadtxt('C_l_ns092.dat',usecols=[1], unpack=True)
 
-C_l_b030            = np.loadtxt('C_l_om_b030.dat',usecols=[1], unpack=True)
-C_l_b060            = np.loadtxt('C_l_om_b060.dat',usecols=[1], unpack=True)
-C_l_m150            = np.loadtxt('C_l_om_m150.dat',usecols=[1], unpack=True)
-C_l_m300            = np.loadtxt('C_l_om_m300.dat',usecols=[1], unpack=True)
-C_l_r83d4            = np.loadtxt('C_l_om_r83d4.dat',usecols=[1], unpack=True)
-C_l_r43d5            = np.loadtxt('C_l_om_r43d5.dat',usecols=[1], unpack=True)
+C_l_b030         = np.loadtxt('C_l_om_b030.dat',usecols=[1], unpack=True)
+C_l_b060         = np.loadtxt('C_l_om_b060.dat',usecols=[1], unpack=True)
+C_l_m150         = np.loadtxt('C_l_om_m150.dat',usecols=[1], unpack=True)
+C_l_m300         = np.loadtxt('C_l_om_m300.dat',usecols=[1], unpack=True)
+C_l_r83d4        = np.loadtxt('C_l_om_r83d4.dat',usecols=[1], unpack=True)
+C_l_r43d5        = np.loadtxt('C_l_om_r43d5.dat',usecols=[1], unpack=True)
 
-C_l_bf1            = np.loadtxt('C_l_bf1.dat',usecols=[1], unpack=True)
+C_l_bf           = np.loadtxt('C_l_bf1.dat',usecols=[1], unpack=True)
 
 C_l_r = np.array([C_l_r43d5, C_l_r83d4])
 C_l_m = np.array([C_l_m150, C_l_m300])
@@ -109,8 +109,8 @@ C_l_n = np.array([C_l_n092, C_l_n099])
 
 param = 5
 plt.figure()
-plt.errorbar(planck_l, C_l_planck, yerr=error, label=r'Planck', zorder=0, elinewidth=1,capsize=1)
-plt.plot(l_hires, C_l*5775/np.max(C_l), label='default')
+plt.errorbar(planck_l, C_l_planck, yerr=error, label=r'Planck', zorder=0, elinewidth=1,capsize=2)
+#plt.plot(l_hires, C_l*5775/np.max(C_l), label='default')
 if param == 0: # rerun, increase Omega_m, increases the spectrum, bearly, after first peak, look similiar to h
     plt.plot(l_hires, C_l_m[0]*5775./np.max(C_l_m[0]), label=(r'\Omega_m=0.150'))
     plt.plot(l_hires, C_l_m[1]*5775./np.max(C_l_m[1]), label=(r'\Omega_m=0.300'))
