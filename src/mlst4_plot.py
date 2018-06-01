@@ -35,17 +35,17 @@ plt.rc('text',usetex=True)
 plt.rc('font',**{'family':'serif','size':16})
 
 #-------------- plot integrands
-'''
+
 Sj  = np.loadtxt('Sj_l.dat', unpack=True)
 bessel= np.loadtxt('besseltest.dat', unpack=True)
 bessel2= np.loadtxt('besseltest2.dat', unpack=True)
-
+'''
 plt.figure()
 
 #plt.plot(x_hires, bessel, label='1')
 #plt.plot(x_hires, bessel2,label='2')
 
-plt.plot(x_hires, Sj/1e-3) 
+plt.plot(x_hires, Sj/1e-3,linewidth='0.9') 
 #plt.legend(loc='upper left')
 plt.ylabel(r'$\tilde S(k,x)j_l[\eta_0-\eta]/10^{-3}$')
 plt.xlabel(r'$x$')
@@ -55,32 +55,35 @@ plt.tight_layout()
 
 l_val=np.array([6, 100, 200, 500, 1000, 1200])
 plt.figure()
-[plt.plot(k_hires, l_val[i]*(1+l_val[i])*C_l_int[i]*H0/c, label=(r'$l=%d$'%l_val[i])) for i in range(len(l_val))]
+[plt.plot(k_hires, l_val[i]*(1+l_val[i])*C_l_int[i]*H0/c, linewidth='0.9', label=(r'$l=%d$'%l_val[i])) for i in range(len(l_val))]
 #plt.plot(k_hires, l_val[2]*(1+l_val[2])*C_l_int[i]*H0/c)
 plt.legend(loc='upper right')
 plt.ylabel(r'$l(l+1)\Theta_l^2_l(k)H_0/ck$')
 plt.xlabel(r'$kc/H_0$')
 plt.tight_layout()
+plt.xlim(0,500)
 #plt.grid('on', linestyle ='--')
 plt.show()
 #sys.exit()
 
 # --------------- plot Theta_l and the power spectrum C_l
 plt.figure()
-[plt.plot(k_hires, Theta_l[i], label=(r'$l=%d$' %l_val[i])) for i in range(len(l_val))]
-plt.legend(loc='upper right')
+[plt.plot(k_hires, Theta_l[i], linewidth='0.9', label=(r'$l=%d$' %l_val[i])) for i in range(len(l_val))]
+plt.legend(loc='lower right')
 plt.ylabel(r'$\Theta_l$')
 plt.xlabel(r'$kc/H_0$')
 plt.tight_layout()
+plt.xlim(0,500)
 plt.show()
 
 plt.figure()
 plt.errorbar(planck_l, C_l_planck, yerr=error, label='Planck',zorder=0)
-plt.plot(l_hires, C_l*normal, label='simulated')
+plt.plot(l_hires, C_l*5775./np.max(C_l), label='simulated')
 plt.legend(loc='upper right')
 plt.ylabel(r'$l(l+1)C_l/2\pi$')
 plt.xlabel(r'$l$')
 plt.tight_layout()
+plt.xlim(0, 1200)
 plt.show()
 '''
 #------------------------- parameter estimation ---------------------
@@ -142,4 +145,3 @@ plt.xlabel(r'$l$')
 plt.xlim(0,1200)
 plt.tight_layout()
 plt.show()
-
