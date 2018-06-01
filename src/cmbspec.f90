@@ -32,7 +32,7 @@ program cmbspec
   !call write_to_file_time_mod
   !call write_to_file_rec_mod
   !call write_to_file_evolution_mod
-  !call write_to_file_cl_mod
+  call write_to_file_cl_mod
 
   !Print time used
   call cpu_time(end_time)

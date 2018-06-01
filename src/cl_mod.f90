@@ -48,7 +48,7 @@ contains
     allocate(x_hires(n_x_hires))
     allocate(k_hires(n_k_hires))
 
-    filename1 = 'source.bin'
+    filename1 = 'source_bf1.bin'
     inquire(file=filename1, exist=exist)
     if (exist) then
        write(*,*) 'reading Source function from file'
@@ -157,7 +157,7 @@ contains
           integrand1(i) = S(j,i)*splint(z_spline,j_l(:,l),j_l2(:,l), k_hires(j)*eta_arr(i))
           integral1 = integral1 + integrand1(i)
         end do
-        Theta_l(l,j) = h1*integral1  -0.5d0*(integrand1(1)+integrand1(n_x_hires)))
+        Theta_l(l,j) = h1*(integral1  -0.5d0*(integrand1(1)+integrand1(n_x_hires)))
 
         if(l==17 .and. j==j_loc .and. n_s==0.96) then   ! Save l=100 and k=340 compare with Callin
           write(*,*)'writing integrand to file for l=17,k=',j_loc
@@ -174,7 +174,7 @@ contains
         integral2 = integral2 + integrand2(l,j)
       end do 
       write(*,*) 'integration for cl'
-      integral2 = h2*integral2 - 0.5d0*(integrand2(l,1)+integrand2(l,n_k_hires)))
+      integral2 = h2*(integral2 - 0.5d0*(integrand2(l,1)+integrand2(l,n_k_hires)))
 
       ! Task: Store C_l in an array. Optionally output to file
       cls(l) = integral2*ls(l)*(ls(l)+1.d0)/(2.d0*pi)
@@ -232,41 +232,41 @@ contains
  
 !-------------- write to file ---------------
     write(*,*) "opening files "
-    open (unit=1, file = 'l_val_ns099.dat', status='replace')
-    open (unit=2, file = 'x_k_hires_ns099.dat', status='replace')
-    open (unit=3, file = 'Theta_l_ns099.dat', status='replace')
-    open (unit=4, file = 'C_l_integrand_ns099.dat', status='replace')
-    open (unit=5, file = 'C_l.dat', status='replace')
+!    open (unit=1, file = 'l_val_ns099.dat', status='replace')
+!    open (unit=2, file = 'x_k_hires_ns099.dat', status='replace')
+!    open (unit=3, file = 'Theta_l_ns099.dat', status='replace')
+!    open (unit=4, file = 'C_l_integrand_ns099.dat', status='replace')
+    open (unit=5, file = 'C_l_bf12.dat', status='replace')
 
     write(*,*) "writing stuff"
     write(*,*) '    writing chosen k values'
-    do i=1, 6 ! write the k values used
-      write(1, *) l_val(i)      
-    end do
+!    do i=1, 6 ! write the k values used
+!      write(1, *) l_val(i)      
+!    end do
 
-    write(*,*) '    writing x, k, source func., Theta_intl100, C_l100_int,Theta_l, C_l_int'
-    do i=1, n_x_hires
-      write (2,'(*(2X, ES14.6E3))') x_hires(i), k_hires(i)
-      write (3,'(*(2X, ES14.6E3))')&
-        Theta_l(l(1), i),Theta_l(l(2), i),Theta_l(l(3), i),Theta_l(l(4),i ),Theta_l(l(5), i),Theta_l(l(6), i)
-      write (4,'(*(2X, ES14.6E3))')&
-        integrand2(l(1), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-        integrand2(l(2), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-        integrand2(l(3), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-        integrand2(l(4), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-        integrand2(l(5), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
-        integrand2(l(6), i)/(c*k_hires(i)/H_0)**(n_s-1.d0)
-    end do
+!    write(*,*) '    writing x, k, source func., Theta_intl100, C_l100_int,Theta_l, C_l_int'
+!    do i=1, n_x_hires
+!      write (2,'(*(2X, ES14.6E3))') x_hires(i), k_hires(i)
+!      write (3,'(*(2X, ES14.6E3))')&
+!        Theta_l(l(1), i),Theta_l(l(2), i),Theta_l(l(3), i),Theta_l(l(4),i ),Theta_l(l(5), i),Theta_l(l(6), i)
+!      write (4,'(*(2X, ES14.6E3))')&
+!        integrand2(l(1), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+!        integrand2(l(2), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+!        integrand2(l(3), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+!        integrand2(l(4), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+!        integrand2(l(5), i)/(c*k_hires(i)/H_0)**(n_s-1.d0),&
+!        integrand2(l(6), i)/(c*k_hires(i)/H_0)**(n_s-1.d0)
+!    end do
 
     write(*,*) '    writing l_hires and c_l_hires'
     do i=1,1200
       write (5,'(*(2X, ES14.6E3))') ls_hires(i), cls_hires(i)
     end do
-    
+   close(5) 
     write(*,*) 'closing files'
-    do i=1, 5
-      close(i)
-    end do
+!    do i=1, 5
+!      close(i)
+!    end do
 
   end subroutine write_to_file_cl_mod
 end module cl_mod
