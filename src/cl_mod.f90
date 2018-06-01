@@ -157,7 +157,7 @@ contains
           integrand1(i) = S(j,i)*splint(z_spline,j_l(:,l),j_l2(:,l), k_hires(j)*eta_arr(i))
           integral1 = integral1 + integrand1(i)
         end do
-        Theta_l(l,j) = h1*integral1  !-0.5d0*(integrand1(1)+integrand1(n_x_hires)))
+        Theta_l(l,j) = h1*integral1  -0.5d0*(integrand1(1)+integrand1(n_x_hires)))
 
         if(l==17 .and. j==j_loc .and. n_s==0.96) then   ! Save l=100 and k=340 compare with Callin
           write(*,*)'writing integrand to file for l=17,k=',j_loc
@@ -174,7 +174,7 @@ contains
         integral2 = integral2 + integrand2(l,j)
       end do 
       write(*,*) 'integration for cl'
-      integral2 = h2*integral2! - 0.5d0*(integrand2(l,1)+integrand2(l,n_k_hires)))
+      integral2 = h2*integral2 - 0.5d0*(integrand2(l,1)+integrand2(l,n_k_hires)))
 
       ! Task: Store C_l in an array. Optionally output to file
       cls(l) = integral2*ls(l)*(ls(l)+1.d0)/(2.d0*pi)
